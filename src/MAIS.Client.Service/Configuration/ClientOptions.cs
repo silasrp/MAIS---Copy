@@ -19,6 +19,10 @@ public sealed class ClientOptions
     /// <summary>Whether to launch the sidebar on this client (can be overridden by server policy).</summary>
     public bool LaunchSidebarOnStart { get; set; } = false;
 
+    /// <summary>Absolute path to the sidebar executable. Empty = do not launch.</summary>
+    public string SidebarExecutablePath { get; set; } = "";
+
+
     /// <summary>Interval in seconds for health reporting to server.</summary>
     public int HealthReportIntervalSeconds { get; set; } = 60;
 

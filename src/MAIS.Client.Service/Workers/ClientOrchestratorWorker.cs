@@ -27,6 +27,8 @@ public sealed class ClientOrchestratorWorker : BackgroundService, IPolicyProvide
 
     private string? _clientId;
     private ClientProfile? _cachedPolicy;
+    private bool _isRegistered;
+
     public ClientProfile? GetCurrentPolicy() => _cachedPolicy;
 
     public ClientOrchestratorWorker(
@@ -67,43 +69,21 @@ public sealed class ClientOrchestratorWorker : BackgroundService, IPolicyProvide
 
             _logger.LogInformation("Discovered {ModuleCount} client modules", clientModules.Count);
 
-            // Register with server
-            var registered = await RegisterWithServerAsync(stoppingToken);
-            if (!registered)
-            {
-                _logger.LogWarning("Failed to register with server; proceeding with cached policy if available");
-            }
+            // Connect to server — retries indefinitely until cancellation
+            await ConnectWithRetryAsync(stoppingToken);
 
-            // Fetch policy from server
-            var policy = await FetchPolicyAsync(stoppingToken);
-            if (policy == null)
-            {
-                _logger.LogWarning("No policy received from server; using default (no modules enabled)");
-                _cachedPolicy = new ClientProfile
-                {
-                    ClientId = _clientId,
-                    Role = _clientOptions.UserRole,
-                    EnableSidebar = false,
-                    EnabledModules = []
-                };
-            }
-            else
-            {
-                _cachedPolicy = policy;
-            }
-
-            // Start only allowed modules
-            await StartAllowedModulesAsync(stoppingToken);
-
-            // Launch sidebar if configured and policy allows
-            if (_cachedPolicy.EnableSidebar && _clientOptions.LaunchSidebarOnStart)
+            if (_cachedPolicy?.EnableSidebar == true && _clientOptions.LaunchSidebarOnStart)
                 LaunchSidebar();
 
             _logger.LogInformation("Client orchestrator ready");
 
-            // Run until cancellation
-            await Task.Delay(Timeout.Infinite, stoppingToken)
-                .ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+            // Periodic policy refresh
+            using var refreshTimer = new PeriodicTimer(
+                TimeSpan.FromSeconds(_clientOptions.PolicyRefreshIntervalSeconds));
+
+            while (await refreshTimer.WaitForNextTickAsync(stoppingToken))
+                await RefreshPolicyAsync(stoppingToken);
+
         }
         catch (OperationCanceledException)
         {
@@ -174,6 +154,48 @@ public sealed class ClientOrchestratorWorker : BackgroundService, IPolicyProvide
         }
     }
 
+    private async Task ConnectWithRetryAsync(CancellationToken ct)
+    {
+        while (!ct.IsCancellationRequested)
+        {
+            _isRegistered = await RegisterWithServerAsync(ct);
+            if (_isRegistered)
+            {
+                var policy = await FetchPolicyAsync(ct);
+                _cachedPolicy = policy ?? BuildEmptyPolicy();
+                await StartAllowedModulesAsync(ct);
+                return;
+            }
+
+            _logger.LogWarning("Server unreachable — retrying in 30 s");
+            await Task.Delay(TimeSpan.FromSeconds(30), ct)
+                .ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+        }
+    }
+
+    private async Task RefreshPolicyAsync(CancellationToken ct)
+    {
+        if (!_isRegistered)
+            _isRegistered = await RegisterWithServerAsync(ct);
+
+        if (!_isRegistered) return;
+
+        var policy = await FetchPolicyAsync(ct);
+        if (policy == null) return;
+
+        _cachedPolicy = policy;
+        await StartAllowedModulesAsync(ct);
+    }
+
+    private ClientProfile BuildEmptyPolicy() => new()
+    {
+        ClientId = _clientId!,
+        Role = _clientOptions.UserRole,
+        EnableSidebar = false,
+        EnabledModules = []
+    };
+
+
     private async Task StartAllowedModulesAsync(CancellationToken cancellationToken)
     {
         var modules = _registry.GetAllModules();
@@ -188,6 +210,9 @@ public sealed class ClientOrchestratorWorker : BackgroundService, IPolicyProvide
 
         foreach (var descriptor in modules)
         {
+            if (descriptor.Status is ModuleStatus.Running or ModuleStatus.Starting)
+                continue;
+
             if (!allowedModuleIds.Contains(descriptor.Id))
             {
                 _logger.LogDebug("Module {ModuleId} not in policy; skipping", descriptor.Id);
@@ -250,36 +275,33 @@ public sealed class ClientOrchestratorWorker : BackgroundService, IPolicyProvide
         }
     }
 
-    private void LaunchSidebar()
-    {
-        try
-        {
-            var sidebarPath = System.IO.Path.Combine(
-                AppContext.BaseDirectory,
-                "..",
-                "..",
-                "MAIS.Sidebar",
-                "bin",
-                "Release",
-                "net10.0-windows",
-                "win-x64",
-                "MAIS.Sidebar.exe");
+private void LaunchSidebar()
+{
+    var sidebarPath = _clientOptions.SidebarExecutablePath;
 
-            if (System.IO.File.Exists(sidebarPath))
-            {
-                System.Diagnostics.Process.Start(sidebarPath);
-                _logger.LogInformation("Sidebar launched");
-            }
-            else
-            {
-                _logger.LogWarning("Sidebar executable not found at {Path}", sidebarPath);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error launching sidebar");
-        }
+    if (string.IsNullOrWhiteSpace(sidebarPath))
+    {
+        _logger.LogWarning("SidebarExecutablePath not configured; sidebar will not launch");
+        return;
     }
+
+    try
+    {
+        if (!System.IO.File.Exists(sidebarPath))
+        {
+            _logger.LogWarning("Sidebar executable not found at {Path}", sidebarPath);
+            return;
+        }
+
+        System.Diagnostics.Process.Start(sidebarPath);
+        _logger.LogInformation("Sidebar launched from {Path}", sidebarPath);
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error launching sidebar");
+    }
+}
+
 
     private string GenerateClientId()
     {
