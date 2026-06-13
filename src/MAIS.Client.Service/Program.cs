@@ -84,7 +84,7 @@ try
     builder.Services.AddHostedService<HealthReporterWorker>();
 
     // ── Module registrations ─────────────────────────────────────────────
-    builder.Services.AddCrimsSeverityModule(builder.Configuration, isServerEnvironment: false);
+    builder.Services.AddCrimsSeverityModule(builder.Configuration);
 
     // ── Build and Map ────────────────────────────────────────────────────
     var app = builder.Build();

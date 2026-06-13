@@ -92,7 +92,7 @@ try
     builder.Services.AddHealthChecks();
 
     // ── Module registrations ────────────────────────────────────────────────
-    builder.Services.AddCrimsSeverityModule(builder.Configuration, isServerEnvironment: true);
+    builder.Services.AddCrimsSeverityModule(builder.Configuration);
 
     var app = builder.Build();
 

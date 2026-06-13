@@ -21,37 +21,23 @@ public static class ServiceExtensions
     /// True if registering in MAIS.Server.Service (uses SignalR reporter).
     /// False if registering in MAIS.Client.Service (uses HTTP reporter).
     /// </param>
-    public static IServiceCollection AddCrimsSeverityModule(
-        this IServiceCollection services,
-        IConfiguration configuration,
-        bool isServerEnvironment = true)
-    {
-        // Bind options from configuration (supports per-environment overrides)
-        services.Configure<CrimsSeverityOptions>(opts =>
-            configuration.GetSection(CrimsSeverityOptions.SectionName).Bind(opts));
+public static IServiceCollection AddCrimsSeverityModule(
+    this IServiceCollection services,
+    IConfiguration configuration)
+{
+    services.Configure<CrimsSeverityOptions>(opts =>
+        configuration.GetSection(CrimsSeverityOptions.SectionName).Bind(opts));
 
-        var options = configuration
-            .GetSection(CrimsSeverityOptions.SectionName)
-            .Get<CrimsSeverityOptions>() ?? new CrimsSeverityOptions();
+    var options = configuration
+        .GetSection(CrimsSeverityOptions.SectionName)
+        .Get<CrimsSeverityOptions>() ?? new CrimsSeverityOptions();
 
-        // Register the appropriate reporter based on environment
-        if (isServerEnvironment)
-        {
-            // Server environment: use SignalR for real-time broadcasts
-            services.AddSingleton<ISeverityReporter, SignalRSeverityReporter>();
-        }
-        else
-        {
-            // Client environment: use logging (local only)
-            services.AddSingleton<ISeverityReporter, HttpSeverityReporter>();
-        }
+    services.AddSingleton<ISeverityReporter, SignalRSeverityReporter>();
+    services.AddSingleton<IModule>(new CrimsSeverityModule(options));
+    services.AddHostedService<CrimsSeverityWorker>();
 
-        // Register module and worker (they will get ISeverityReporter injected)
-        services.AddSingleton<IModule>(new CrimsSeverityModule(options));
-        services.AddHostedService<CrimsSeverityWorker>();
-
-        return services;
-    }
+    return services;
+}
 
     /// <summary>
     /// Configures CrimsSeverity module middleware (server-side only).

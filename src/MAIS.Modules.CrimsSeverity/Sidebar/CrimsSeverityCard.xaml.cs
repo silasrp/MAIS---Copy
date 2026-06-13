@@ -53,10 +53,11 @@ namespace MAIS.Modules.CrimsSeverity.Sidebar
                 var hubUrl = vm?.HubUrl ?? "http://localhost:5002/hubs/severity";
 
                 // Inject the hub URL into the page so it connects to the right service
-                await SeverityWebView.CoreWebView2.ExecuteScriptAsync(
-                    $@"window.__MAIS_HUB_URL__ = '{hubUrl}';");
+                await SeverityWebView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(
+                    $"window.__MAIS_HUB_URL__ = '{hubUrl}';");
 
                 SeverityWebView.CoreWebView2.Navigate(panelUrl);
+
 
             }
             catch (Exception ex)
