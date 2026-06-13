@@ -4,6 +4,7 @@ using MAIS.Client.Service.Workers;
 using MAIS.Core.Abstractions;
 using MAIS.Infrastructure.Extensions;
 using MAIS.Modules.CrimsSeverity.Extensions;
+using MAIS.Modules.CrimsAddinHealth.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -85,12 +86,14 @@ try
 
     // ── Module registrations ─────────────────────────────────────────────
     builder.Services.AddCrimsSeverityModule(builder.Configuration);
+    builder.Services.AddCrimsAddinHealthModule(builder.Configuration);
 
     // ── Build and Map ────────────────────────────────────────────────────
     var app = builder.Build();
 
     // ── Module setup (maps hub and static files) ─────────────────────────
     app.UseCrimsSeverityModule();
+    app.UseCrimsAddinHealthModule();
 
     app.MapControllers();
 

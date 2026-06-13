@@ -1,4 +1,5 @@
 using MAIS.Modules.CrimsSeverity.Extensions;
+using MAIS.Modules.CrimsAddinHealth.Extensions;
 using MAIS.Infrastructure.Extensions;
 using MAIS.Server.Service.Configuration;
 using MAIS.Server.Service.Registry;
@@ -93,6 +94,7 @@ try
 
     // ── Module registrations ────────────────────────────────────────────────
     builder.Services.AddCrimsSeverityModule(builder.Configuration);
+    builder.Services.AddCrimsAddinHealthModule(builder.Configuration);
 
     var app = builder.Build();
 
@@ -115,6 +117,7 @@ try
 
     // ── Module setup (includes static files) ──────────────────────────────────
     app.UseCrimsSeverityModule();
+    app.UseCrimsAddinHealthModule();
 
     app.UseCors("SidebarPolicy");
     app.UseRouting();

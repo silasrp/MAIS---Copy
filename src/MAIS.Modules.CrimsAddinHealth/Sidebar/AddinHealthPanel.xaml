@@ -1,0 +1,423 @@
+<Window x:Class="MAIS.Modules.CrimsAddinHealth.Sidebar.AddinHealthPanel"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:MAIS.Modules.CrimsAddinHealth.Sidebar"
+        Title="CRIMS Addin Health"
+        Width="640"
+        WindowStyle="None"
+        ResizeMode="CanResizeWithGrip"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        Topmost="False">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <SolidColorBrush x:Key="PanelBg"       Color="#0F1221"/>
+        <SolidColorBrush x:Key="HeaderBg"      Color="#161A30"/>
+        <SolidColorBrush x:Key="CardBg"        Color="#1A1F35"/>
+        <SolidColorBrush x:Key="BorderClr"     Color="#2A3A5C"/>
+        <SolidColorBrush x:Key="AccentBlue"    Color="#6C8EFF"/>
+        <SolidColorBrush x:Key="TextPrimary"   Color="#D1D5E8"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#8B95B0"/>
+        <SolidColorBrush x:Key="RedAlert"      Color="#F87171"/>
+        <SolidColorBrush x:Key="AmberAlert"    Color="#FB923C"/>
+        <SolidColorBrush x:Key="GreenOk"       Color="#34D399"/>
+
+        <Style x:Key="TabBtn" TargetType="Button">
+            <Setter Property="Background"      Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0,0,0,2"/>
+            <Setter Property="BorderBrush"     Value="Transparent"/>
+            <Setter Property="Foreground"      Value="{StaticResource TextSecondary}"/>
+            <Setter Property="FontSize"        Value="11"/>
+            <Setter Property="Padding"         Value="14,8"/>
+            <Setter Property="Cursor"          Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ActionBtn" TargetType="Button">
+            <Setter Property="Background"      Value="#6C8EFF22"/>
+            <Setter Property="BorderBrush"     Value="#6C8EFF55"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground"      Value="{StaticResource AccentBlue}"/>
+            <Setter Property="FontSize"        Value="10"/>
+            <Setter Property="Padding"         Value="10,4"/>
+            <Setter Property="Cursor"          Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#6C8EFF44"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ApproveBtn" TargetType="Button" BasedOn="{StaticResource ActionBtn}">
+            <Setter Property="Background"  Value="#34D39922"/>
+            <Setter Property="BorderBrush" Value="#34D39955"/>
+            <Setter Property="Foreground"  Value="{StaticResource GreenOk}"/>
+        </Style>
+
+        <Style x:Key="DeferBtn" TargetType="Button" BasedOn="{StaticResource ActionBtn}">
+            <Setter Property="Background"  Value="#FB923C22"/>
+            <Setter Property="BorderBrush" Value="#FB923C55"/>
+            <Setter Property="Foreground"  Value="{StaticResource AmberAlert}"/>
+        </Style>
+
+        <Style x:Key="DismissBtn" TargetType="Button" BasedOn="{StaticResource ActionBtn}">
+            <Setter Property="Background"  Value="#FFFFFF0A"/>
+            <Setter Property="BorderBrush" Value="#FFFFFF22"/>
+            <Setter Property="Foreground"  Value="{StaticResource TextSecondary}"/>
+        </Style>
+    </Window.Resources>
+
+    <Border CornerRadius="6" Background="{StaticResource PanelBg}"
+            BorderBrush="{StaticResource BorderClr}" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="4" Opacity="0.6" Direction="270"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Title Bar -->
+            <Border Grid.Row="0" Background="{StaticResource HeaderBg}"
+                    CornerRadius="6,6,0,0" Padding="16,10"
+                    MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Ellipse Width="8" Height="8" Fill="{StaticResource AccentBlue}" Margin="0,0,8,0"/>
+                        <TextBlock Text="CRIMS Addin Health" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimary}"/>
+                    </StackPanel>
+                    <Button Content="✕" HorizontalAlignment="Right"
+                            Click="CloseButton_Click"
+                            Background="Transparent" BorderThickness="0"
+                            Foreground="{StaticResource TextSecondary}"
+                            FontSize="12" Cursor="Hand" Padding="4"/>
+                </Grid>
+            </Border>
+
+            <!-- Tab Strip -->
+            <Border Grid.Row="1" Background="{StaticResource HeaderBg}"
+                    BorderBrush="{StaticResource BorderClr}" BorderThickness="0,0,0,1">
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="BtnPending"
+                            Content="{Binding PendingTabHeader}"
+                            Style="{StaticResource TabBtn}"
+                            Click="Tab_Click" Tag="Pending"/>
+                    <Button x:Name="BtnScheduled"
+                            Content="Scheduled Updates"
+                            Style="{StaticResource TabBtn}"
+                            Click="Tab_Click" Tag="Scheduled"/>
+                    <Button x:Name="BtnAudit"
+                            Content="Audit Log"
+                            Style="{StaticResource TabBtn}"
+                            Click="Tab_Click" Tag="Audit"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Tab Content -->
+            <Grid Grid.Row="2">
+
+                <!-- PENDING APPROVALS -->
+                <ScrollViewer x:Name="PendingPane"
+                              VerticalScrollBarVisibility="Auto"
+                              Padding="12">
+                    <StackPanel>
+                        <TextBlock Text="No pending approvals"
+                                   Foreground="{StaticResource TextSecondary}"
+                                   FontSize="11" HorizontalAlignment="Center"
+                                   Margin="0,40,0,0"
+                                   Visibility="{Binding HasNoPending, Converter={StaticResource BoolToVis}}"/>
+
+                        <ItemsControl ItemsSource="{Binding PendingApprovals}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type local:UpdateRequestViewModel}">
+                                    <Border Background="{StaticResource CardBg}"
+                                            BorderBrush="{StaticResource BorderClr}"
+                                            BorderThickness="1" CornerRadius="4"
+                                            Padding="12" Margin="0,0,0,8">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <!-- Header: machine + risk badge -->
+                                            <Grid Grid.Row="0">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding MachineName}"
+                                                               FontSize="12" FontWeight="SemiBold"
+                                                               Foreground="{StaticResource TextPrimary}"/>
+                                                    <TextBlock Text=" · " Foreground="{StaticResource TextSecondary}" FontSize="11"/>
+                                                    <TextBlock Text="{Binding AssetTag}"
+                                                               Foreground="{StaticResource TextSecondary}" FontSize="11"/>
+                                                </StackPanel>
+                                                <Border HorizontalAlignment="Right" CornerRadius="3" Padding="6,2"
+                                                        Background="{Binding RiskBadgeColor}">
+                                                    <TextBlock Text="{Binding RiskLevel}"
+                                                               FontSize="9" FontWeight="SemiBold" Foreground="White"/>
+                                                </Border>
+                                            </Grid>
+
+                                            <!-- Sub-info row -->
+                                            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,4,0,0">
+                                                <TextBlock Text="User: " Foreground="{StaticResource TextSecondary}" FontSize="10"/>
+                                                <TextBlock Text="{Binding CrimsUserId}" Foreground="{StaticResource TextPrimary}" FontSize="10"/>
+                                                <TextBlock Text="  Role: " Foreground="{StaticResource TextSecondary}" FontSize="10"/>
+                                                <TextBlock Text="{Binding MachineRole}" Foreground="{StaticResource TextPrimary}" FontSize="10"/>
+                                            </StackPanel>
+
+                                            <!-- AI approval message -->
+                                            <TextBlock Grid.Row="2" Text="{Binding ApprovalMessage}"
+                                                       Foreground="{StaticResource TextSecondary}"
+                                                       FontSize="10" TextWrapping="Wrap"
+                                                       Margin="0,6,0,0"/>
+
+                                            <!-- Recommended timing -->
+                                            <TextBlock Grid.Row="3"
+                                                       Text="{Binding RecommendedTiming, StringFormat='⏱  {0}'}"
+                                                       Foreground="{StaticResource AmberAlert}"
+                                                       FontSize="10" Margin="0,4,0,0"/>
+
+                                            <!-- DLL list toggle -->
+                                            <StackPanel Grid.Row="4" Margin="0,8,0,0">
+                                                <Button Content="{Binding DllToggleLabel}"
+                                                        Style="{StaticResource DismissBtn}"
+                                                        HorizontalAlignment="Left"
+                                                        Padding="8,3"
+                                                        Command="{Binding ToggleDllListCommand}"/>
+
+                                                <ItemsControl ItemsSource="{Binding Mismatches}"
+                                                              Visibility="{Binding IsDllListExpanded, Converter={StaticResource BoolToVis}}"
+                                                              Margin="0,6,0,0">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Grid Margin="0,2">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Grid.Column="0"
+                                                                           Text="{Binding FileName}"
+                                                                           Foreground="{StaticResource TextSecondary}"
+                                                                           FontSize="9"/>
+                                                                <TextBlock Grid.Column="1"
+                                                                           Text="{Binding LocalVersion}"
+                                                                           Foreground="{StaticResource AmberAlert}"
+                                                                           FontSize="9" Margin="8,0"/>
+                                                                <TextBlock Grid.Column="2"
+                                                                           Text="{Binding RepositoryVersion}"
+                                                                           Foreground="{StaticResource GreenOk}"
+                                                                           FontSize="9"/>
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+
+                                            <!-- Action buttons -->
+                                            <StackPanel Grid.Row="5" Orientation="Horizontal"
+                                                        HorizontalAlignment="Right" Margin="0,10,0,0">
+                                                <Button Content="Approve"
+                                                        Style="{StaticResource ApproveBtn}"
+                                                        Command="{Binding DataContext.ApproveCommand,
+                                                                  RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}"
+                                                        Margin="0,0,6,0"/>
+                                                <Button Content="Defer to EoD"
+                                                        Style="{StaticResource DeferBtn}"
+                                                        Command="{Binding DataContext.DeferCommand,
+                                                                  RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}"
+                                                        Margin="0,0,6,0"/>
+                                                <Button Content="Dismiss"
+                                                        Style="{StaticResource DismissBtn}"
+                                                        Command="{Binding DataContext.DismissCommand,
+                                                                  RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- SCHEDULED UPDATES -->
+                <ScrollViewer x:Name="ScheduledPane"
+                              Visibility="Collapsed"
+                              VerticalScrollBarVisibility="Auto"
+                              Padding="12">
+                    <StackPanel>
+                        <TextBlock Text="No scheduled updates"
+                                   Foreground="{StaticResource TextSecondary}"
+                                   FontSize="11" HorizontalAlignment="Center"
+                                   Margin="0,40,0,0"
+                                   Visibility="{Binding HasNoScheduled, Converter={StaticResource BoolToVis}}"/>
+
+                        <ItemsControl ItemsSource="{Binding ScheduledUpdates}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type local:QueueEntryViewModel}">
+                                    <Border Background="{StaticResource CardBg}"
+                                            BorderBrush="{StaticResource BorderClr}"
+                                            BorderThickness="1" CornerRadius="4"
+                                            Padding="12" Margin="0,0,0,8">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="{Binding MachineName}"
+                                                           FontSize="12" FontWeight="SemiBold"
+                                                           Foreground="{StaticResource TextPrimary}"/>
+                                                <TextBlock Text="{Binding CountdownLabel}"
+                                                           FontSize="10" Foreground="{StaticResource AmberAlert}"
+                                                           Margin="0,3,0,0"/>
+                                            </StackPanel>
+                                            <Border Grid.Column="1" CornerRadius="3" Padding="6,2"
+                                                    Background="#FB923C22" BorderBrush="#FB923C55" BorderThickness="1"
+                                                    VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding StatusLabel}"
+                                                           FontSize="9" Foreground="{StaticResource AmberAlert}"/>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- AUDIT LOG -->
+                <Grid x:Name="AuditPane" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Padding="12,8"
+                            BorderBrush="{StaticResource BorderClr}" BorderThickness="0,0,0,1">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="↻ Refresh" Style="{StaticResource ActionBtn}"
+                                    Command="{Binding LoadAuditCommand}" Margin="0,0,6,0"/>
+                            <Button Content="⬇ Export CSV" Style="{StaticResource ActionBtn}"
+                                    Command="{Binding ExportAuditCommand}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="12,8">
+                        <ItemsControl ItemsSource="{Binding AuditRecords}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type local:AuditRecordViewModel}">
+                                    <Border Background="{StaticResource CardBg}"
+                                            BorderBrush="{StaticResource BorderClr}"
+                                            BorderThickness="1" CornerRadius="3"
+                                            Padding="10,6" Margin="0,0,0,4">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="{Binding MachineName}"
+                                                           FontSize="11" FontWeight="SemiBold"
+                                                           Foreground="{StaticResource TextPrimary}"/>
+                                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                                    <TextBlock Text="{Binding CrimsUser}"
+                                                               FontSize="10" Foreground="{StaticResource TextSecondary}"/>
+                                                    <TextBlock Text=" · " Foreground="{StaticResource TextSecondary}" FontSize="10"/>
+                                                    <TextBlock Text="{Binding DllCount, StringFormat='{}{0} DLLs'}"
+                                                               FontSize="10" Foreground="{StaticResource TextSecondary}"/>
+                                                    <TextBlock Text=" · approved by " Foreground="{StaticResource TextSecondary}" FontSize="10"/>
+                                                    <TextBlock Text="{Binding ApprovedBy}"
+                                                               FontSize="10" Foreground="{StaticResource TextSecondary}"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding Date, StringFormat='{}{0:dd/MM HH:mm}'}"
+                                                       FontSize="10" Foreground="{StaticResource TextSecondary}"
+                                                       VerticalAlignment="Center" Margin="12,0"/>
+                                            <TextBlock Grid.Column="2"
+                                                       Text="{Binding Status}"
+                                                       FontSize="10" VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="{StaticResource GreenOk}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding Status}" Value="✗ Failed">
+                                                                <Setter Property="Foreground" Value="{StaticResource RedAlert}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <TextBlock Grid.Row="2"
+                               Text="Showing last 30 days"
+                               FontSize="9" Foreground="{StaticResource TextSecondary}"
+                               Padding="12,4" HorizontalAlignment="Center"/>
+                </Grid>
+
+                <!-- Busy overlay -->
+                <Border Background="#80000000"
+                        Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="Working…" Foreground="{StaticResource TextPrimary}"
+                               FontSize="13" HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Border>
+            </Grid>
+
+            <!-- Status Bar -->
+            <Border Grid.Row="3" Background="{StaticResource HeaderBg}"
+                    BorderBrush="{StaticResource BorderClr}" BorderThickness="0,1,0,0"
+                    CornerRadius="0,0,6,6" Padding="12,6">
+                <TextBlock Text="{Binding StatusMessage}"
+                           FontSize="10" Foreground="{StaticResource TextSecondary}"/>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

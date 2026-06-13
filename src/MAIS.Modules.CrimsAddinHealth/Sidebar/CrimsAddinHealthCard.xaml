@@ -1,0 +1,97 @@
+<UserControl x:Class="MAIS.Modules.CrimsAddinHealth.Sidebar.CrimsAddinHealthCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:MAIS.Modules.CrimsAddinHealth.Sidebar">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+
+    <Border Background="#1A1F35" BorderBrush="#2A3A5C" BorderThickness="1"
+            CornerRadius="4" Padding="10,8" Margin="0,0,0,6">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Header row -->
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Status dot -->
+                    <Ellipse Width="8" Height="8" Margin="0,0,6,0">
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse">
+                                <Setter Property="Fill" Value="#34D399"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasHighRiskAlerts}" Value="True">
+                                        <Setter Property="Fill" Value="#F87171"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding PendingAlertCount}" Value="0">
+                                        <Setter Property="Fill" Value="#34D399"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+
+                    <TextBlock Text="{Binding DisplayName}"
+                               FontSize="10" FontWeight="SemiBold"
+                               Foreground="#8B95B0"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Alert count badge -->
+                <Border Grid.Column="1" CornerRadius="8" Padding="5,1"
+                        Visibility="{Binding PendingAlertCount, Converter={StaticResource BoolToVis}}">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="#FB923C26"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasHighRiskAlerts}" Value="True">
+                                    <Setter Property="Background" Value="#F8717126"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <TextBlock FontSize="9" FontWeight="SemiBold">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="#FB923C"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasHighRiskAlerts}" Value="True">
+                                        <Setter Property="Foreground" Value="#F87171"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                        <Run Text="{Binding PendingAlertCount}"/>
+                        <Run Text=" pending"/>
+                    </TextBlock>
+                </Border>
+            </Grid>
+
+            <!-- Summary text -->
+            <TextBlock Grid.Row="1" Text="{Binding AlertSummary}"
+                       FontSize="9" Foreground="#4A5568"
+                       Margin="0,4,0,0"/>
+
+            <!-- View All button -->
+            <Button Grid.Row="2" Content="View All →"
+                    Command="{Binding OpenPanelCommand}"
+                    Margin="0,6,0,0"
+                    Padding="6,2"
+                    FontSize="9"
+                    HorizontalAlignment="Right"
+                    Background="Transparent"
+                    Foreground="#6C8EFF"
+                    BorderThickness="0"
+                    Cursor="Hand"/>
+        </Grid>
+    </Border>
+</UserControl>

@@ -18,6 +18,7 @@
 	<ProjectReference Include="..\MAIS.Core\MAIS.Core.csproj" />
 	<ProjectReference Include="..\MAIS.Sidebar.Abstractions\MAIS.Sidebar.Abstractions.csproj" />
 	<ProjectReference Include="..\MAIS.Modules.CrimsSeverity\MAIS.Modules.CrimsSeverity.csproj" />
+	<ProjectReference Include="..\MAIS.Modules.CrimsAddinHealth\MAIS.Modules.CrimsAddinHealth.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.0" />

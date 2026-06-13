@@ -1,5 +1,6 @@
 using MAIS.Modules.CrimsSeverity;
 using MAIS.Modules.CrimsSeverity.Extensions;
+using MAIS.Modules.CrimsAddinHealth.Extensions;
 using MAIS.Sidebar.Abstractions;
 using MAIS.Sidebar.Configuration;
 using MAIS.Sidebar.Services;
@@ -117,6 +118,7 @@ public partial class App : System.Windows.Application
         var baseUrl = services.GetRequiredService<IOptions<ServiceConnectionOptions>>().Value.ApiBaseUrl;
 
         registry.AddCrimsSeveritySidebarCard(baseUrl);
+        registry.AddCrimsAddinHealthSidebarCard(baseUrl);
 
         foreach (var uri in registry.GetResourceDictionaryUris())
         {
