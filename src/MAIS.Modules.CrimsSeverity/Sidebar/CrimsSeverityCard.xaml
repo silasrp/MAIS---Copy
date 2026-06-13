@@ -1,0 +1,95 @@
+<UserControl x:Class="MAIS.Modules.CrimsSeverity.Sidebar.CrimsSeverityCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf">
+
+    <Border Margin="8,4"
+            Background="#16213E"
+            BorderBrush="#2A3A5C"
+            BorderThickness="1"
+            CornerRadius="8"
+            ClipToBounds="True">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>   <!-- title bar -->
+                <RowDefinition Height="160"/>    <!-- WebView2 panel -->
+                <RowDefinition Height="Auto"/>   <!-- status strip -->
+            </Grid.RowDefinitions>
+
+            <!-- ── Title bar ── -->
+            <Border Grid.Row="0" Background="#0F172A" Padding="10,6">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Ellipse Grid.Column="0" Width="7" Height="7"
+                             VerticalAlignment="Center" Margin="0,0,7,0">
+                        <Ellipse.Fill>
+                            <!-- Inline converter-free binding via style trigger -->
+                            <SolidColorBrush x:Name="StatusDotBrush" Color="#6B7280"/>
+                        </Ellipse.Fill>
+                    </Ellipse>
+
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding DisplayName}"
+                               Foreground="#8B95B0" FontSize="10" FontWeight="SemiBold"
+                               FontFamily="Segoe UI" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"/>
+
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding Version, StringFormat='v{0}'}"
+                               Foreground="#4A5568" FontSize="9" FontFamily="Segoe UI"
+                               VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
+
+            <!-- ── WebView2 panel ── -->
+            <wv2:WebView2 x:Name="SeverityWebView" Grid.Row="1" Source="{x:Null}"/>
+
+            <!-- Loading placeholder -->
+            <Border x:Name="LoadingPlaceholder" Grid.Row="1" Background="#16213E">
+                <TextBlock Text="Initialising panel…"
+                           Foreground="#4A5568" FontSize="10" FontFamily="Segoe UI"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+
+            <!-- ── Status strip ── -->
+            <Border Grid.Row="2" Background="#0A1020" Padding="10,5">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Live — CRIMS log aggregator"
+                               Foreground="#4A5568" FontSize="9" FontFamily="Segoe UI"
+                               VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                    <Button Grid.Column="1"
+                            Content="Open ↗"
+                            Command="{Binding LaunchCommand}"
+                            Height="20" FontSize="9" Padding="6,2" Cursor="Hand"
+                            Background="Transparent" Foreground="#8B95B0"
+                            BorderBrush="#2A3A5C" BorderThickness="1">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="bd" Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="bd" Property="Background" Value="#1E2D4A"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

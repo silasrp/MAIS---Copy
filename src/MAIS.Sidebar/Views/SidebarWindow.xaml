@@ -1,0 +1,202 @@
+<Window x:Class="MAIS.Sidebar.Views.SidebarWindow"
+        xmlns:vm="clr-namespace:MAIS.Sidebar.ViewModels"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:MAIS.Sidebar.Views"
+        xmlns:conv="clr-namespace:MAIS.Sidebar.Converters"
+        Title="MAIS"
+        Icon="pack://application:,,,/Resources/mais.ico"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        AllowsTransparency="False"
+        Background="{StaticResource BrushBackground}"
+        Width="280">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="../Resources/Styles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <conv:StatusToBrushConverter x:Key="StatusToBrush"/>
+            <conv:ConnectionToBrushConverter x:Key="ConnToBrush"/>
+            <conv:BoolToVisibilityConverter x:Key="BoolToVis"/>
+            <conv:InverseBoolToVisibilityConverter x:Key="InvBoolToVis"/>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>   <!-- header -->
+            <RowDefinition Height="Auto"/>   <!-- metrics strip -->
+            <RowDefinition Height="Auto"/>   <!-- separator -->
+            <RowDefinition Height="*"/>      <!-- module list -->
+            <RowDefinition Height="Auto"/>   <!-- footer -->
+        </Grid.RowDefinitions>
+
+        <!-- ═══════════════════════════════════════════════════════════════
+             Header
+        ═══════════════════════════════════════════════════════════════════ -->
+        <Border Grid.Row="0"
+                Background="{StaticResource BrushSurface}"
+                BorderBrush="{StaticResource BrushBorderSubtle}"
+                BorderThickness="0,0,0,1"
+                Padding="12,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Logo + title -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- MAIS application icon -->
+                    <Image Width="20" Height="20" Margin="0,0,8,0" 
+                           Source="/MAIS.Sidebar;component/Resources/mais.ico"
+                           VerticalAlignment="Center"/>
+                    <TextBlock Text="MAIS" Style="{StaticResource TextHeading}"
+                               FontSize="15" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Refresh button -->
+                <Button Grid.Column="1"
+                        Style="{StaticResource IconButton}"
+                        Command="{Binding RefreshModulesCommand}"
+                        ToolTip="Refresh modules"
+                        Margin="0,0,2,0">
+                    <TextBlock Text="↻" FontSize="14"
+                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                </Button>
+
+                <!-- Minimise to tray -->
+                <Button Grid.Column="2"
+                        Style="{StaticResource IconButton}"
+                        Click="OnMinimiseToTray"
+                        ToolTip="Minimise to tray">
+                    <TextBlock Text="—" FontSize="12"
+                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- ═══════════════════════════════════════════════════════════════
+             Metrics strip
+        ═══════════════════════════════════════════════════════════════════ -->
+        <Border Grid.Row="1" Padding="10,6" Background="{StaticResource BrushSurface}">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+
+                <!-- Running -->
+                <Border Style="{StaticResource MetricBadge}" Background="#0D2A1A" Margin="0,0,6,0">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="6" Height="6" Fill="#34D399" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding RunningCount}" FontSize="11"
+                                   Foreground="#34D399" FontWeight="SemiBold" FontFamily="Segoe UI"/>
+                        <TextBlock Text=" running" FontSize="11" Foreground="#4A5568" FontFamily="Segoe UI"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Degraded -->
+                <Border Style="{StaticResource MetricBadge}" Background="#2A1E0A" Margin="0,0,6,0"
+                        Visibility="{Binding IsDegradedVisible, FallbackValue=Visible}">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="6" Height="6" Fill="#FBBF24" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding DegradedCount}" FontSize="11"
+                                   Foreground="#FBBF24" FontWeight="SemiBold" FontFamily="Segoe UI"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Faulted -->
+                <Border Style="{StaticResource MetricBadge}" Background="#2A0D0D"
+                        Visibility="{Binding IsFaultedVisible, FallbackValue=Visible}">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="6" Height="6" Fill="#F87171" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding FaultedCount}" FontSize="11"
+                                   Foreground="#F87171" FontWeight="SemiBold" FontFamily="Segoe UI"/>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </Border>
+
+        <!-- ═══════════════════════════════════════════════════════════════
+             Separator
+        ═══════════════════════════════════════════════════════════════════ -->
+        <Rectangle Grid.Row="2" Height="1" Fill="{StaticResource BrushBorderSubtle}"/>
+
+        <!-- ═══════════════════════════════════════════════════════════════
+             Module list
+        ═══════════════════════════════════════════════════════════════════ -->
+        <Grid Grid.Row="3">
+
+            <!-- Loading state -->
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                        Visibility="{Binding IsLoadingModules, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="Loading modules…" Style="{StaticResource TextSecondary}"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+
+            <!-- Empty state -->
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                        Visibility="{Binding IsEmptyState, FallbackValue=Collapsed}">
+                <TextBlock Text="No modules registered" Style="{StaticResource TextMuted}"
+                           HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                <TextBlock Text="Register a module to get started"
+                           Style="{StaticResource TextMuted}" FontSize="10"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+
+            <!-- Module cards -->
+            <ScrollViewer Style="{StaticResource SlimScrollViewer}"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          Visibility="{Binding IsLoadingModules, Converter={StaticResource InvBoolToVis}}">
+                <ItemsControl ItemsSource="{Binding Modules}" Padding="0,4">
+                    <ItemsControl.Resources>
+                        <DataTemplate DataType="{x:Type vm:ModuleCardViewModel}">
+                            <views:ModuleCard/>
+                        </DataTemplate>
+                    </ItemsControl.Resources>
+                </ItemsControl>
+            </ScrollViewer>
+
+        </Grid>
+
+        <!-- ═══════════════════════════════════════════════════════════════
+             Footer — connection status
+        ═══════════════════════════════════════════════════════════════════ -->
+        <Border Grid.Row="4"
+                Background="{StaticResource BrushSurface}"
+                BorderBrush="{StaticResource BrushBorderSubtle}"
+                BorderThickness="0,1,0,0"
+                Padding="12,7">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Connection dot -->
+                <Ellipse Grid.Column="0" Width="7" Height="7"
+                         Fill="{Binding IsServiceConnected, Converter={StaticResource ConnToBrush}}"
+                         VerticalAlignment="Center" Margin="0,0,7,0"/>
+
+                <!-- Status text -->
+                <TextBlock Grid.Column="1"
+                           Text="{Binding ConnectionStatus}"
+                           Style="{StaticResource TextMuted}"
+                           FontSize="10"
+                           VerticalAlignment="Center"/>
+
+                <!-- Module count -->
+                <TextBlock Grid.Column="2"
+                           Text="{Binding TotalModules, StringFormat={}{0} module(s)}"
+                           Style="{StaticResource TextMuted}"
+                           FontSize="10"
+                           VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
+    </Grid>
+</Window>

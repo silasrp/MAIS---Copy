@@ -1,0 +1,33 @@
+{
+  "cyberark": {
+    "vault_url": "https://cyberark.mfs.com/AIMWebService/api",
+    "safe": "CRIMS_Sweep_update",
+    "app_id": "ConsoleApp_CRIMS_Sweep_update",
+    "cyberark_object": "corp.mfs.com_CRIMS_Sweep_Update",
+    "username": "CRIMS_Sweep_Update",    
+    "timeout": 15
+  },  
+  "machines": [
+    {
+      "hostname": "VDI-0267",
+      "share_path": "\\CharlesRiver\\23R3\\Client\\AddIns",      
+      "enabled": true
+    },
+    {
+      "hostname": "014-Q118",
+      "share_path": "\\CharlesRiver\\23R3\\Client\\AddIns",      
+      "enabled": true
+    },
+    {
+      "hostname": "server03.domain.com",
+      "share_path": "\\CharlesRiver\\23R3\\Client\\AddIns",      
+      "enabled": false
+    }
+  ],
+  "options": {
+    "batch_size": 100,
+    "connection_timeout": 30,
+    "read_timeout": 60,
+    "verify_ssl": false
+  }
+}

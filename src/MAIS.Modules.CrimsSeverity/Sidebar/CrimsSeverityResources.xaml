@@ -1,0 +1,15 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sidebar="clr-namespace:MAIS.Modules.CrimsSeverity.Sidebar">
+
+    <!--
+        Implicit DataTemplate: WPF matches this by DataType without needing a key
+        or a DataTemplateSelector. Any ItemsControl that encounters a
+        CrimsSeverityCardViewModel in its Items collection will render it using
+        the CrimsSeverityCard UserControl automatically.
+    -->
+    <DataTemplate DataType="{x:Type sidebar:CrimsSeverityCardViewModel}">
+        <sidebar:CrimsSeverityCard/>
+    </DataTemplate>
+
+</ResourceDictionary>
