@@ -37,3 +37,4 @@
 /src/MAIS.Server.Service/bin/Release/net10.0-windows/win-x64
 /src/MAIS.Sidebar.Abstractions/bin/Release/net10.0-windows
 /src/MAIS.Server.Service/logs
+src/MAIS.Modules.CrimsAddinHealth/obj/*

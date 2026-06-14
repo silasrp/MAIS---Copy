@@ -7,7 +7,7 @@ public sealed class QueueEntry
     public UpdateApproval Approval     { get; init; } = null!;
     public QueueEntryStatus Status     { get; set; }  = QueueEntryStatus.Waiting;
     public DateTimeOffset  EnqueuedAt  { get; init; } = DateTimeOffset.UtcNow;
-    public DateTimeOffset? ScheduledFor { get; init; }
+    public DateTimeOffset? ScheduledFor { get; set; }
     public DateTimeOffset? StartedAt   { get; set; }
     public DateTimeOffset? CompletedAt { get; set; }
     public string?         FailureReason { get; set; }

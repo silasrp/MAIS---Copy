@@ -3,6 +3,7 @@ using System.Text.Json;
 using MAIS.Modules.CrimsAddinHealth.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.IO;
 
 namespace MAIS.Modules.CrimsAddinHealth.Agent;
 

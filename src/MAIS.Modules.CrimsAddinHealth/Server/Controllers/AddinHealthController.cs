@@ -2,6 +2,7 @@ using MAIS.Modules.CrimsAddinHealth.Hubs;
 using MAIS.Modules.CrimsAddinHealth.Models;
 using MAIS.Modules.CrimsAddinHealth.Server;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace MAIS.Modules.CrimsAddinHealth.Server.Controllers;
 

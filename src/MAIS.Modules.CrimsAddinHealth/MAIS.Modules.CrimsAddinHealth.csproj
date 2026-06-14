@@ -1,11 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net10.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
+	  <TargetFramework>net10.0-windows10.0.17763.0</TargetFramework>
+	  <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <UseWPF>true</UseWPF>
-    <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>MAIS.Modules.CrimsAddinHealth</RootNamespace>
     <Description>CRIMS addin DLL health and auto-update module for the MAIS framework. Self-contained: server orchestration, AI analysis, client scanning, file update, WPF approval panel.</Description>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
