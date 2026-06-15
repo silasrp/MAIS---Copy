@@ -1,3 +1,4 @@
+using MAIS.Core.Models;
 using MAIS.Client.Service.Configuration;
 using MAIS.Client.Service.Registries;
 using MAIS.Client.Service.Workers;
@@ -86,7 +87,7 @@ try
 
     // ── Module registrations ─────────────────────────────────────────────
     builder.Services.AddCrimsSeverityModule(builder.Configuration);
-    builder.Services.AddCrimsAddinHealthModule(builder.Configuration);
+    builder.Services.AddCrimsAddinHealthModule(builder.Configuration, ModuleHostType.Client);
 
     // ── Build and Map ────────────────────────────────────────────────────
     var app = builder.Build();

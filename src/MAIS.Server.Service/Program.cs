@@ -1,3 +1,4 @@
+using MAIS.Core.Models;
 using MAIS.Modules.CrimsSeverity.Extensions;
 using MAIS.Modules.CrimsAddinHealth.Extensions;
 using MAIS.Infrastructure.Extensions;
@@ -94,7 +95,7 @@ try
 
     // ── Module registrations ────────────────────────────────────────────────
     builder.Services.AddCrimsSeverityModule(builder.Configuration);
-    builder.Services.AddCrimsAddinHealthModule(builder.Configuration);
+    builder.Services.AddCrimsAddinHealthModule(builder.Configuration, ModuleHostType.Server);
 
     var app = builder.Build();
 

@@ -12,9 +12,9 @@ namespace MAIS.Modules.CrimsAddinHealth.Extensions;
 
 public static class ServiceExtensions
 {
-    public static IServiceCollection AddCrimsAddinHealthModule(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddCrimsAddinHealthModule(this IServiceCollection services,
+        IConfiguration configuration,
+        ModuleHostType hostRole)
     {
         services.Configure<CrimsAddinHealthOptions>(
             configuration.GetSection(CrimsAddinHealthOptions.SectionName));
@@ -33,14 +33,14 @@ public static class ServiceExtensions
 
         services.AddSingleton<IModule>(new CrimsAddinHealthModule(options));
 
-        if (options.HostType is ModuleHostType.Server or ModuleHostType.Both)
+        if (hostRole is ModuleHostType.Server or ModuleHostType.Both)
             RegisterServerServices(services);
 
-        if (options.HostType == ModuleHostType.Client)
+        if (hostRole == ModuleHostType.Client)
             services.AddSingleton<IAddinHealthMessageHandler, NullAddinHealthMessageHandler>();
 
-        if (options.HostType is ModuleHostType.Client or ModuleHostType.Both)
-            RegisterClientServices(services, options);
+        if (hostRole is ModuleHostType.Client or ModuleHostType.Both)
+            RegisterClientServices(services);
 
         return services;
     }
@@ -61,19 +61,14 @@ public static class ServiceExtensions
             sp => sp.GetRequiredService<UpdateOrchestrator>());
     }
 
-    private static void RegisterClientServices(IServiceCollection services, CrimsAddinHealthOptions options)
+    private static void RegisterClientServices(IServiceCollection services)
     {
         services.AddSingleton<LocalAddinScanner>();
         services.AddSingleton<ProcessDetector>();
         services.AddSingleton<FileUpdater>();
         services.AddSingleton<NotificationRelay>();
         services.AddHostedService<AddinScanWorker>();
-
-        // ServerHubRelay only runs on the client service — on the server (HostType.Both),
-        // the hub is already local so connecting back to it would create an infinite loop.
-        if (options.HostType == ModuleHostType.Client)
-            services.AddHostedService<ServerHubRelay>();
-
+        services.AddHostedService<ServerHubRelay>();
         services.AddHttpClient("AddinHealthServer")
             .ConfigureHttpClient((sp, client) =>
             {
