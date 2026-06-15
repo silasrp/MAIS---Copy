@@ -91,9 +91,10 @@ public sealed partial class SidebarViewModel : ViewModelBase, IAsyncDisposable
         IsLoadingModules = true;
         try
         {
+            _logger.LogInformation("RefreshModules: fetching module list");
             var descriptors = await _serviceClient.GetModulesAsync(ct);
+            _logger.LogInformation("RefreshModules: got {Count} modules", descriptors.Count);
 
-            // Merge: update existing cards, add new ones, remove gone ones
             var incoming = descriptors.ToList();
             var toRemove = Modules
                 .Where(m => !incoming.Any(d => d.Id == m.ModuleId))
@@ -104,6 +105,7 @@ public sealed partial class SidebarViewModel : ViewModelBase, IAsyncDisposable
 
             foreach (var descriptor in incoming)
             {
+                _logger.LogInformation("RefreshModules: creating VM for {Id}", descriptor.Id);
                 var existing = Modules.FirstOrDefault(m => m.ModuleId == descriptor.Id);
                 if (existing is not null)
                 {
@@ -113,9 +115,11 @@ public sealed partial class SidebarViewModel : ViewModelBase, IAsyncDisposable
                 {
                     Modules.Add(_cardRegistry.CreateViewModel(descriptor, _serviceClient, (d, c) => ModuleCardViewModel.FromDescriptor(d, c)));
                 }
+                _logger.LogInformation("RefreshModules: done {Id}", descriptor.Id);
             }
 
             UpdateCounts();
+            _logger.LogInformation("RefreshModules: complete");
         }
         catch (Exception ex)
         {

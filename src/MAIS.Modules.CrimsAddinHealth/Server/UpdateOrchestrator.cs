@@ -68,6 +68,8 @@ public sealed class UpdateOrchestrator : BackgroundService, IAddinHealthMessageH
     {
         _logger.LogInformation("UpdateOrchestrator started");
 
+        await _manifest.InitialiseAsync(stoppingToken);
+
         while (!stoppingToken.IsCancellationRequested)
         {
             try

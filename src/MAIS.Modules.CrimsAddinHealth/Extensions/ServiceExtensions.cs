@@ -19,6 +19,14 @@ public static class ServiceExtensions
         services.Configure<CrimsAddinHealthOptions>(
             configuration.GetSection(CrimsAddinHealthOptions.SectionName));
 
+        services.PostConfigure<CrimsAddinHealthOptions>(opts =>
+        {
+            if (string.IsNullOrWhiteSpace(opts.ServerApiUrl))
+                opts.ServerApiUrl = configuration["Client:ServerUrl"] ?? "http://localhost:5000";
+            if (string.IsNullOrWhiteSpace(opts.MachineRole))
+                opts.MachineRole = configuration["Client:UserRole"] ?? "Unknown";
+        });
+
         var options = configuration
             .GetSection(CrimsAddinHealthOptions.SectionName)
             .Get<CrimsAddinHealthOptions>() ?? new CrimsAddinHealthOptions();
@@ -27,6 +35,9 @@ public static class ServiceExtensions
 
         if (options.HostType is ModuleHostType.Server or ModuleHostType.Both)
             RegisterServerServices(services);
+
+        if (options.HostType == ModuleHostType.Client)
+            services.AddSingleton<IAddinHealthMessageHandler, NullAddinHealthMessageHandler>();
 
         if (options.HostType is ModuleHostType.Client or ModuleHostType.Both)
             RegisterClientServices(services, options);
@@ -56,16 +67,22 @@ public static class ServiceExtensions
         services.AddSingleton<ProcessDetector>();
         services.AddSingleton<FileUpdater>();
         services.AddSingleton<NotificationRelay>();
-        services.AddSingleton<IAddinHealthMessageHandler, NullAddinHealthMessageHandler>();
         services.AddHostedService<AddinScanWorker>();
 
-        // Named HttpClient for calling the server's addin-health REST API
-        services.AddHttpClient("AddinHealthServer", client =>
-        {
-            client.BaseAddress = new Uri(options.ServerApiUrl);
-            client.Timeout     = TimeSpan.FromSeconds(30);
-        });
+        // ServerHubRelay only runs on the client service — on the server (HostType.Both),
+        // the hub is already local so connecting back to it would create an infinite loop.
+        if (options.HostType == ModuleHostType.Client)
+            services.AddHostedService<ServerHubRelay>();
+
+        services.AddHttpClient("AddinHealthServer")
+            .ConfigureHttpClient((sp, client) =>
+            {
+                var opts = sp.GetRequiredService<IOptions<CrimsAddinHealthOptions>>().Value;
+                client.BaseAddress = new Uri(opts.ServerApiUrl);
+                client.Timeout     = TimeSpan.FromSeconds(30);
+            });
     }
+
 
     public static WebApplication UseCrimsAddinHealthModule(this WebApplication app)
     {

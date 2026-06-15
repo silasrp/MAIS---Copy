@@ -9,13 +9,21 @@ namespace MAIS.Modules.CrimsAddinHealth.Sidebar;
 
 public sealed partial class CrimsAddinHealthCardViewModel : ModuleCardViewModelBase
 {
-    [ObservableProperty] private int    _pendingAlertCount;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasPendingAlerts))]
+    private int _pendingAlertCount;
+
     [ObservableProperty] private bool   _hasHighRiskAlerts;
-    [ObservableProperty] private string _alertSummary = "Checking…";
+    [ObservableProperty] private string _alertSummary = "All CRIMS addins up to date";
+
+    public bool HasPendingAlerts => PendingAlertCount > 0;
 
     public string ServiceBaseUrl { get; init; } = "http://localhost:5002";
 
     private readonly ObservableCollection<UpdateRequest> _pendingAlerts = [];
+
+    private CrimsAddinHealthHubClient? _hubClient;
+    public void SetHubClient(CrimsAddinHealthHubClient hubClient) => _hubClient = hubClient;
 
     public IRelayCommand OpenPanelCommand { get; }
 
@@ -43,22 +51,32 @@ public sealed partial class CrimsAddinHealthCardViewModel : ModuleCardViewModelB
 
     public void OnNewAlert(UpdateRequest request)
     {
-        _pendingAlerts.Add(request);
-        RefreshAlertState();
+        System.Diagnostics.Debug.WriteLine($"[CAH] OnNewAlert #{_pendingAlerts.Count + 1}. Thread={Environment.CurrentManagedThreadId}");
+
+        try
+        {
+            _pendingAlerts.Add(request);
+            RefreshAlertState();
+        }
+        catch { }
     }
 
     public void OnAlertResolved(string requestId)
     {
-        var item = _pendingAlerts.FirstOrDefault(r => r.RequestId == requestId);
-        if (item is not null)
-            _pendingAlerts.Remove(item);
-        RefreshAlertState();
+        try
+        {
+            var item = _pendingAlerts.FirstOrDefault(r => r.RequestId == requestId);
+            if (item is not null)
+                _pendingAlerts.Remove(item);
+            RefreshAlertState();
+        }
+        catch { }
     }
 
     private void RefreshAlertState()
     {
         PendingAlertCount = _pendingAlerts.Count;
-        HasHighRiskAlerts = _pendingAlerts.Any(r => r.AgentAnalysis.RiskLevel == "High");
+        HasHighRiskAlerts = _pendingAlerts.Any(r => r.AgentAnalysis?.RiskLevel == "High");
 
         AlertSummary = PendingAlertCount switch
         {

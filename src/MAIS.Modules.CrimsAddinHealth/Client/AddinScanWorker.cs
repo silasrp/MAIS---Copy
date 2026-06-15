@@ -65,7 +65,21 @@ public sealed class AddinScanWorker : BackgroundService
         // Give the client orchestrator time to register and receive policy
         await Task.Delay(TimeSpan.FromSeconds(15), stoppingToken);
 
+        if (string.IsNullOrWhiteSpace(_machineRole) || _machineRole == "Unknown")
+            _machineRole = _options.MachineRole;
+
         _logger.LogInformation("AddinScanWorker started. Schedule: {Schedule}", _options.ScanSchedule);
+
+        try
+        {
+            _logger.LogInformation("Running initial scan on startup");
+            await RunScheduledScanAsync(stoppingToken);
+        }
+        catch (OperationCanceledException) { return; }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Initial startup scan failed");
+        }
 
         var schedule = CrontabSchedule.Parse(_options.ScanSchedule);
 
@@ -88,6 +102,7 @@ public sealed class AddinScanWorker : BackgroundService
                 await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
             }
         }
+
     }
 
     // ── Scan logic ────────────────────────────────────────────────────────────

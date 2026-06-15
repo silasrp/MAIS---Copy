@@ -6,8 +6,12 @@
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </UserControl.Resources>
 
-    <Border Background="#1A1F35" BorderBrush="#2A3A5C" BorderThickness="1"
-            CornerRadius="4" Padding="10,8" Margin="0,0,0,6">
+    <Border Margin="8,4"
+            Background="#16213E"
+            BorderBrush="#2A3A5C"
+            BorderThickness="1"
+            CornerRadius="8"
+            ClipToBounds="True">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -15,83 +19,112 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- Header row -->
-            <Grid Grid.Row="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+            <!-- ── Title bar ── -->
+            <Border Grid.Row="0" Background="#0F172A" Padding="10,6">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <!-- Status dot -->
-                    <Ellipse Width="8" Height="8" Margin="0,0,6,0">
+                    <Ellipse Grid.Column="0" Width="7" Height="7"
+                             VerticalAlignment="Center" Margin="0,0,7,0">
                         <Ellipse.Style>
                             <Style TargetType="Ellipse">
-                                <Setter Property="Fill" Value="#34D399"/>
+                                <Setter Property="Fill" Value="#6B7280"/>
                                 <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasPendingAlerts}" Value="True">
+                                        <Setter Property="Fill" Value="#FB923C"/>
+                                    </DataTrigger>
                                     <DataTrigger Binding="{Binding HasHighRiskAlerts}" Value="True">
                                         <Setter Property="Fill" Value="#F87171"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding PendingAlertCount}" Value="0">
-                                        <Setter Property="Fill" Value="#34D399"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
                         </Ellipse.Style>
                     </Ellipse>
 
-                    <TextBlock Text="{Binding DisplayName}"
-                               FontSize="10" FontWeight="SemiBold"
-                               Foreground="#8B95B0"
-                               VerticalAlignment="Center"/>
-                </StackPanel>
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding DisplayName}"
+                               Foreground="#8B95B0" FontSize="10" FontWeight="SemiBold"
+                               FontFamily="Segoe UI" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"/>
 
-                <!-- Alert count badge -->
-                <Border Grid.Column="1" CornerRadius="8" Padding="5,1"
-                        Visibility="{Binding PendingAlertCount, Converter={StaticResource BoolToVis}}">
-                    <Border.Style>
-                        <Style TargetType="Border">
-                            <Setter Property="Background" Value="#FB923C26"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding HasHighRiskAlerts}" Value="True">
-                                    <Setter Property="Background" Value="#F8717126"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Border.Style>
-                    <TextBlock FontSize="9" FontWeight="SemiBold">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Foreground" Value="#FB923C"/>
+                    <Border Grid.Column="2" CornerRadius="8" Padding="5,1"
+                            VerticalAlignment="Center"
+                            Visibility="{Binding HasPendingAlerts, Converter={StaticResource BoolToVis}}">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Background" Value="#FB923C26"/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding HasHighRiskAlerts}" Value="True">
-                                        <Setter Property="Foreground" Value="#F87171"/>
+                                        <Setter Property="Background" Value="#F8717126"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
-                        </TextBlock.Style>
-                        <Run Text="{Binding PendingAlertCount}"/>
-                        <Run Text=" pending"/>
-                    </TextBlock>
-                </Border>
-            </Grid>
+                        </Border.Style>
+                        <TextBlock FontSize="9" FontWeight="SemiBold">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="#FB923C"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HasHighRiskAlerts}" Value="True">
+                                            <Setter Property="Foreground" Value="#F87171"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                            <Run Text="{Binding PendingAlertCount}"/>
+                            <Run Text=" pending"/>
+                        </TextBlock>
+                    </Border>
+                </Grid>
+            </Border>
 
-            <!-- Summary text -->
-            <TextBlock Grid.Row="1" Text="{Binding AlertSummary}"
-                       FontSize="9" Foreground="#4A5568"
-                       Margin="0,4,0,0"/>
+            <!-- ── Content ── -->
+            <Border Grid.Row="1" Padding="10,8">
+                <TextBlock Text="{Binding AlertSummary}"
+                           FontSize="10" Foreground="#8B95B0"
+                           FontFamily="Segoe UI" TextWrapping="Wrap"/>
+            </Border>
 
-            <!-- View All button -->
-            <Button Grid.Row="2" Content="View All →"
-                    Command="{Binding OpenPanelCommand}"
-                    Margin="0,6,0,0"
-                    Padding="6,2"
-                    FontSize="9"
-                    HorizontalAlignment="Right"
-                    Background="Transparent"
-                    Foreground="#6C8EFF"
-                    BorderThickness="0"
-                    Cursor="Hand"/>
+            <!-- ── Status strip ── -->
+            <Border Grid.Row="2" Background="#0A1020" Padding="10,5">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Text="Live — CRIMS addin health"
+                               Foreground="#4A5568" FontSize="9" FontFamily="Segoe UI"
+                               VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                    <Button Grid.Column="1"
+                            Content="View All →"
+                            Command="{Binding OpenPanelCommand}"
+                            Height="20" FontSize="9" Padding="6,2" Cursor="Hand"
+                            Background="Transparent" Foreground="#8B95B0"
+                            BorderBrush="#2A3A5C" BorderThickness="1">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="bd"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="bd" Property="Background" Value="#1E2D4A"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </Grid>
+            </Border>
         </Grid>
     </Border>
 </UserControl>
