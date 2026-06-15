@@ -122,12 +122,16 @@ public sealed partial class AddinHealthPanelViewModel : ObservableObject
     public IAsyncRelayCommand                         LoadAuditCommand { get; }
     public IRelayCommand                              ExportAuditCommand { get; }
 
-    public AddinHealthPanelViewModel(HttpClient serviceClient, string localClientId, string localMachineName, string localUserId)
+    private readonly Func<UpdateApproval, Task>? _submitApproval;
+
+    public AddinHealthPanelViewModel(HttpClient serviceClient, string localClientId, string localMachineName, string localUserId,
+        Func<UpdateApproval, Task>? submitApproval = null)
     {
         _serviceClient    = serviceClient;
         _localClientId    = localClientId;
         _localMachineName = localMachineName;
         _localUserId      = localUserId;
+        _submitApproval = submitApproval;
 
         ApproveCommand     = new AsyncRelayCommand<UpdateRequestViewModel?>(ApproveAsync);
         DeferCommand       = new AsyncRelayCommand<UpdateRequestViewModel?>(DeferAsync);
@@ -279,8 +283,13 @@ public sealed partial class AddinHealthPanelViewModel : ObservableObject
 
     private async Task PostApprovalAsync(UpdateApproval approval)
     {
-        var json     = JsonSerializer.Serialize(approval);
-        var content  = new StringContent(json, Encoding.UTF8, "application/json");
+        if (_submitApproval is not null)
+        {
+            await _submitApproval(approval);
+            return;
+        }
+        var json    = JsonSerializer.Serialize(approval);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
         var response = await _serviceClient.PostAsync("/api/v1/addin-health/approvals", content);
         response.EnsureSuccessStatusCode();
     }

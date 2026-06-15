@@ -69,5 +69,12 @@ public async Task StartAsync()
         catch { }
     }
 
+    public async Task SubmitApprovalAsync(UpdateApproval approval)
+    {
+        try   { await _hub.InvokeAsync("SubmitApproval", approval).ConfigureAwait(false); }
+        catch { }
+    }
+
+
     public async ValueTask DisposeAsync() => await _hub.DisposeAsync();
 }

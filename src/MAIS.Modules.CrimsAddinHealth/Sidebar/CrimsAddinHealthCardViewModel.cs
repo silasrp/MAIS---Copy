@@ -23,6 +23,8 @@ public sealed partial class CrimsAddinHealthCardViewModel : ModuleCardViewModelB
     private readonly ObservableCollection<UpdateRequest> _pendingAlerts = [];
 
     private CrimsAddinHealthHubClient? _hubClient;
+    private AddinHealthPanel?          _panel;
+
     public void SetHubClient(CrimsAddinHealthHubClient hubClient) => _hubClient = hubClient;
 
     public IRelayCommand OpenPanelCommand { get; }
@@ -51,12 +53,11 @@ public sealed partial class CrimsAddinHealthCardViewModel : ModuleCardViewModelB
 
     public void OnNewAlert(UpdateRequest request)
     {
-        System.Diagnostics.Debug.WriteLine($"[CAH] OnNewAlert #{_pendingAlerts.Count + 1}. Thread={Environment.CurrentManagedThreadId}");
-
         try
         {
             _pendingAlerts.Add(request);
             RefreshAlertState();
+            _panel?.ViewModel.OnNewAlert(request);
         }
         catch { }
     }
@@ -66,9 +67,9 @@ public sealed partial class CrimsAddinHealthCardViewModel : ModuleCardViewModelB
         try
         {
             var item = _pendingAlerts.FirstOrDefault(r => r.RequestId == requestId);
-            if (item is not null)
-                _pendingAlerts.Remove(item);
+            if (item is not null) _pendingAlerts.Remove(item);
             RefreshAlertState();
+            _panel?.ViewModel.OnAlertResolved(requestId);
         }
         catch { }
     }
@@ -88,7 +89,18 @@ public sealed partial class CrimsAddinHealthCardViewModel : ModuleCardViewModelB
 
     private void OpenPanel()
     {
-        var panel = new AddinHealthPanel(ServiceBaseUrl);
-        panel.Show();
+        if (_panel is null || !_panel.IsLoaded)
+        {
+            Func<UpdateApproval, Task>? submit = _hubClient is not null
+                ? approval => _hubClient.SubmitApprovalAsync(approval)
+                : null;
+
+            _panel = new AddinHealthPanel(ServiceBaseUrl, submit);
+
+            foreach (var alert in _pendingAlerts)
+                _panel.ViewModel.OnNewAlert(alert);
+        }
+        _panel.Show();
     }
+
 }

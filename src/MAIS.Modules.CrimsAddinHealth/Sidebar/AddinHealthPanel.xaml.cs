@@ -1,7 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Net.Http;
-
+using MAIS.Modules.CrimsAddinHealth.Models;
 
 namespace MAIS.Modules.CrimsAddinHealth.Sidebar;
 
@@ -9,7 +9,7 @@ public partial class AddinHealthPanel : Window
 {
     private readonly AddinHealthPanelViewModel _vm;
 
-    public AddinHealthPanel(string serviceBaseUrl)
+    public AddinHealthPanel(string serviceBaseUrl, Func<UpdateApproval, Task>? submitApproval = null)
     {
         InitializeComponent();
 
@@ -19,13 +19,15 @@ public partial class AddinHealthPanel : Window
             serviceClient:    httpClient,
             localClientId:    Environment.MachineName,
             localMachineName: Environment.MachineName,
-            localUserId:      Environment.UserName);
+            localUserId:      Environment.UserName,
+            submitApproval:   submitApproval);
 
         DataContext = _vm;
 
         PositionLeftOfScreen();
         HighlightTab(BtnPending);
     }
+
 
     public AddinHealthPanelViewModel ViewModel => _vm;
 

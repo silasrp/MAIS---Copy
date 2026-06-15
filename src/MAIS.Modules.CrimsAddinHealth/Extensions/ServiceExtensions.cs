@@ -37,7 +37,7 @@ public static class ServiceExtensions
             RegisterServerServices(services);
 
         if (hostRole == ModuleHostType.Client)
-            services.AddSingleton<IAddinHealthMessageHandler, NullAddinHealthMessageHandler>();
+            services.AddSingleton<IAddinHealthMessageHandler, ClientApprovalHandler>();
 
         if (hostRole is ModuleHostType.Client or ModuleHostType.Both)
             RegisterClientServices(services);
