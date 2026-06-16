@@ -15,6 +15,8 @@ public sealed class CrimsAddinHealthHubClient : IAsyncDisposable
     public event EventHandler<UpdateRequest>? AlertReceived;
     public event EventHandler<string>?        AlertResolved;
     public event EventHandler<QueueEntry>?    StatusChanged;
+    public event EventHandler<ToastMessage>? ToastReceived;
+
 
     public CrimsAddinHealthHubClient(string localHubUrl)
     {
@@ -36,6 +38,9 @@ public sealed class CrimsAddinHealthHubClient : IAsyncDisposable
 
         _hub.On<QueueEntry>("UpdateStatusChanged",
             entry => StatusChanged?.Invoke(this, entry));
+
+        _hub.On<ToastMessage>("ShowToastNotification",
+            msg => ToastReceived?.Invoke(this, msg));
 
         _hub.Reconnected += async _ => await JoinApproversGroupAsync();
     }

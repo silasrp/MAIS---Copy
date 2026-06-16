@@ -102,5 +102,4 @@ public sealed partial class CrimsAddinHealthCardViewModel : ModuleCardViewModelB
         }
         _panel.Show();
     }
-
 }

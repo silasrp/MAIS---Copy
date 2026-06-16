@@ -72,8 +72,8 @@ public sealed class ClientOrchestratorWorker : BackgroundService, IPolicyProvide
             // Connect to server — retries indefinitely until cancellation
             await ConnectWithRetryAsync(stoppingToken);
 
-            if (_cachedPolicy?.EnableSidebar == true && _clientOptions.LaunchSidebarOnStart)
-                LaunchSidebar();
+            if (_clientOptions.LaunchSidebarOnStart)
+                LaunchSidebar(_cachedPolicy?.EnableSidebar == true);
 
             _logger.LogInformation("Client orchestrator ready");
 
@@ -275,33 +275,36 @@ public sealed class ClientOrchestratorWorker : BackgroundService, IPolicyProvide
         }
     }
 
-private void LaunchSidebar()
-{
-    var sidebarPath = _clientOptions.SidebarExecutablePath;
-
-    if (string.IsNullOrWhiteSpace(sidebarPath))
+    private void LaunchSidebar(bool showOnStart)
     {
-        _logger.LogWarning("SidebarExecutablePath not configured; sidebar will not launch");
-        return;
-    }
+        var sidebarPath = _clientOptions.SidebarExecutablePath;
 
-    try
-    {
-        if (!System.IO.File.Exists(sidebarPath))
+        if (string.IsNullOrWhiteSpace(sidebarPath))
         {
-            _logger.LogWarning("Sidebar executable not found at {Path}", sidebarPath);
+            _logger.LogWarning("SidebarExecutablePath not configured; sidebar will not launch");
             return;
         }
 
-        System.Diagnostics.Process.Start(sidebarPath);
-        _logger.LogInformation("Sidebar launched from {Path}", sidebarPath);
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Error launching sidebar");
-    }
-}
+        try
+        {
+            if (!System.IO.File.Exists(sidebarPath))
+            {
+                _logger.LogWarning("Sidebar executable not found at {Path}", sidebarPath);
+                return;
+            }
 
+            var args = showOnStart ? "--show" : "--tray";
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(sidebarPath, args)
+            {
+                UseShellExecute = true
+            });
+            _logger.LogInformation("Sidebar launched ({Mode}) from {Path}", args, sidebarPath);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error launching sidebar");
+        }
+    }
 
     private string GenerateClientId()
     {

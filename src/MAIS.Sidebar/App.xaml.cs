@@ -32,12 +32,18 @@ public partial class App : System.Windows.Application
     {
         base.OnStartup(e);
 
+        var isFullMode = !e.Args.Contains("--tray");
+
         ConfigureSerilog();
         _services = ConfigureServices();
+
+        // Always register module cards — this creates hub clients
+        // that receive toast notifications regardless of role.
+        // In tray mode the module cards simply aren't shown in the window.
         RegisterModuleCards(_services);
 
         var logger = _services.GetRequiredService<ILogger<App>>();
-        logger.LogInformation("MAIS Sidebar starting");
+        logger.LogInformation("MAIS Sidebar starting (mode: {Mode})", isFullMode ? "full" : "tray");
 
         try
         {
@@ -45,7 +51,10 @@ public partial class App : System.Windows.Application
             _trayService = _services.GetRequiredService<SystemTrayService>();
             _trayService.Initialise(window);
 
-            window.Show();
+            // Admin/Support: show immediately.
+            // Trader: stay in tray — toast notifications still work via hub.
+            if (isFullMode)
+                window.Show();
         }
         catch (Exception ex)
         {
@@ -114,11 +123,14 @@ public partial class App : System.Windows.Application
     // After services are built, register module cards
     private static void RegisterModuleCards(IServiceProvider services)
     {
-        var registry = services.GetRequiredService<ModuleCardRegistry>();
-        var baseUrl = services.GetRequiredService<IOptions<ServiceConnectionOptions>>().Value.ApiBaseUrl;
+        var registry    = services.GetRequiredService<ModuleCardRegistry>();
+        var tray        = services.GetRequiredService<SystemTrayService>();
+        var baseUrl     = services.GetRequiredService<IOptions<ServiceConnectionOptions>>().Value.ApiBaseUrl;
 
         registry.AddCrimsSeveritySidebarCard(baseUrl);
-        registry.AddCrimsAddinHealthSidebarCard(baseUrl);
+        registry.AddCrimsAddinHealthSidebarCard(baseUrl, showNotification: (title, body) =>
+            System.Windows.Application.Current.Dispatcher.BeginInvoke(
+                () => tray.ShowBalloonTip(title, body)));
 
         foreach (var uri in registry.GetResourceDictionaryUris())
         {
@@ -126,6 +138,7 @@ public partial class App : System.Windows.Application
                 new ResourceDictionary { Source = uri });
         }
     }
+
 
     // ── Logging ───────────────────────────────────────────────────────────
 

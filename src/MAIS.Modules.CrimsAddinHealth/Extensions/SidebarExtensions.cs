@@ -11,7 +11,8 @@ public static class SidebarExtensions
 
     public static ModuleCardRegistry AddCrimsAddinHealthSidebarCard(
         this ModuleCardRegistry registry,
-        string serviceBaseUrl)
+        string serviceBaseUrl,
+        Action<string, string>? showNotification = null)
     {
         var localHubUrl = serviceBaseUrl.TrimEnd('/') + ModuleConstants.HubPath;
 
@@ -19,11 +20,8 @@ public static class SidebarExtensions
             moduleId:             ModuleConstants.ModuleId,
             factory: (descriptor, client) =>
             {
-                System.Diagnostics.Debug.WriteLine($"[CAH] Factory invoked. Thread={Environment.CurrentManagedThreadId}");
                 var vm        = CrimsAddinHealthCardViewModel.FromDescriptor(descriptor, client, serviceBaseUrl);
-                System.Diagnostics.Debug.WriteLine($"[CAH] VM created.");
                 var hubClient = new CrimsAddinHealthHubClient(localHubUrl);
-                System.Diagnostics.Debug.WriteLine($"[CAH] HubClient constructed.");
 
                 vm.SetHubClient(hubClient);
 
@@ -35,12 +33,15 @@ public static class SidebarExtensions
                     System.Windows.Application.Current.Dispatcher.BeginInvoke(
                         () => vm.OnAlertResolved(id));
 
-                System.Diagnostics.Debug.WriteLine($"[CAH] Firing hubClient.StartAsync fire-and-forget.");
+                hubClient.ToastReceived += (_, msg) =>
+                    System.Windows.Application.Current.Dispatcher.BeginInvoke(
+                        () => showNotification?.Invoke(msg.Title, msg.Body));
+
                 _ = hubClient.StartAsync();
-                System.Diagnostics.Debug.WriteLine($"[CAH] Factory returning vm.");
                 return vm;
             },
             resourceDictionaryUri: ResourceDictionaryUri);
-        return registry;   
+        return registry;
     }
+
 }

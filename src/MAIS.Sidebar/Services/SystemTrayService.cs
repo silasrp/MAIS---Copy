@@ -90,6 +90,12 @@ public sealed class SystemTrayService : IDisposable
             _sidebarWindow?.HideSidebar());
     }
 
+    public void ShowBalloonTip(string title, string body)
+    {
+        _trayIcon.ShowBalloonTip(5000, title, body, System.Windows.Forms.ToolTipIcon.Info);
+    }
+
+
     private static void ExitApplication()
     {
         System.Windows.Application.Current.Dispatcher.Invoke(() =>
