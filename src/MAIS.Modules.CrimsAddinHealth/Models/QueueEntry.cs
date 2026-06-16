@@ -11,6 +11,7 @@ public sealed class QueueEntry
     public DateTimeOffset? StartedAt   { get; set; }
     public DateTimeOffset? CompletedAt { get; set; }
     public string?         FailureReason { get; set; }
+    public string          RepositoryUncPath { get; set; } = "";    
 }
 
 public enum QueueEntryStatus { Waiting, Scheduled, InProgress, Completed, Failed }
@@ -27,6 +28,6 @@ public sealed class UpdateOutcome
     public string              QueueId      { get; init; } = "";
     public bool                Success      { get; init; }
     public IReadOnlyList<string> UpdatedFiles { get; init; } = [];
-    public string?             FailureReason { get; init; }
+    public string?         FailureReason     { get; set; }
     public DateTimeOffset      CompletedAt  { get; init; } = DateTimeOffset.UtcNow;
 }

@@ -40,7 +40,7 @@ public sealed class FileUpdater
                 continue;
             }
 
-            var sourcePath = Path.Combine(_options.RepositoryUncPath, mismatch.FileName);
+            var sourcePath = Path.Combine(manifest.RepositoryUncPath, mismatch.FileName);
             var destPath   = Path.Combine(_options.CrimsAddinsFolder, mismatch.FileName);
 
             _logger.LogInformation("Copying {File} from {Source}", mismatch.FileName, sourcePath);

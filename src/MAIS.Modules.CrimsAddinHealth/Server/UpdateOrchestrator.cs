@@ -155,9 +155,10 @@ public sealed class UpdateOrchestrator : BackgroundService, IAddinHealthMessageH
 
         var entry = new QueueEntry
         {
-            Request     = request,
-            Approval    = approval,
-            ScheduledFor = approval.DeferUntil
+            Request           = request,
+            Approval          = approval,
+            ScheduledFor      = approval.DeferUntil,
+            RepositoryUncPath = _options.RepositoryUncPath
         };
 
         if (approval.DeferUntil.HasValue)

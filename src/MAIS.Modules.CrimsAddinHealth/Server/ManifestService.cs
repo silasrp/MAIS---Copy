@@ -73,9 +73,10 @@ public sealed class ManifestService : IDisposable
 
             _cached = new AddinManifest
             {
-                GeneratedAt    = DateTimeOffset.UtcNow,
-                RepositoryPath = folder,
-                Entries        = entries.AsReadOnly()
+                GeneratedAt       = DateTimeOffset.UtcNow,
+                RepositoryPath    = folder,
+                RepositoryUncPath = _options.RepositoryUncPath,
+                Entries           = entries.AsReadOnly()
             };
 
             _logger.LogInformation("Manifest refreshed: {Count} DLLs in {Elapsed}ms",

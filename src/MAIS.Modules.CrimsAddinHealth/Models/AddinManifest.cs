@@ -2,10 +2,12 @@ namespace MAIS.Modules.CrimsAddinHealth.Models;
 
 public sealed class AddinManifest
 {
-    public DateTimeOffset GeneratedAt    { get; init; } = DateTimeOffset.UtcNow;
-    public string         RepositoryPath { get; init; } = "";
+    public DateTimeOffset GeneratedAt     { get; init; } = DateTimeOffset.UtcNow;
+    public string         RepositoryPath  { get; init; } = "";
+    public string         RepositoryUncPath { get; set; } = "";
     public IReadOnlyList<AddinManifestEntry> Entries { get; init; } = [];
 }
+
 
 public sealed class AddinManifestEntry
 {

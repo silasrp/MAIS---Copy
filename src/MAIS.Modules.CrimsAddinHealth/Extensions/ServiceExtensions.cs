@@ -7,6 +7,8 @@ using MAIS.Modules.CrimsAddinHealth.Server;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 
 namespace MAIS.Modules.CrimsAddinHealth.Extensions;
 
@@ -70,6 +72,9 @@ public static class ServiceExtensions
         services.AddSingleton<AddinScanWorker>();
         services.AddHostedService(sp => sp.GetRequiredService<AddinScanWorker>());
         services.AddHostedService<ServerHubRelay>();
+        services.Configure<MvcOptions>(opts =>
+            opts.Conventions.Add(new ExcludeServerControllersConvention()));
+
         services.AddHttpClient("AddinHealthServer")
             .ConfigureHttpClient((sp, client) =>
             {
@@ -79,10 +84,36 @@ public static class ServiceExtensions
             });
     }
 
-
     public static WebApplication UseCrimsAddinHealthModule(this WebApplication app)
     {
         app.MapHub<AddinHealthHub>(ModuleConstants.HubPath);
+
+        if (app.Services.GetService<UpdateQueue>() is null)
+        {
+            app.MapGet("/api/v1/addin-health/audit", async (HttpContext ctx, IHttpClientFactory factory) =>
+            {
+                var client   = factory.CreateClient("AddinHealthServer");
+                var response = await client.GetAsync(
+                    "/api/v1/addin-health/audit" + ctx.Request.QueryString,
+                    ctx.RequestAborted);
+                var content  = await response.Content.ReadAsStringAsync(ctx.RequestAborted);
+                return Results.Content(content, "application/json");
+            });
+        }
+
         return app;
     }
+
+    private sealed class ExcludeServerControllersConvention : IApplicationModelConvention
+    {
+        public void Apply(ApplicationModel application)
+        {
+            var controller = application.Controllers
+                .FirstOrDefault(c => c.ControllerType.Name == "AddinHealthController");
+            if (controller is not null)
+                application.Controllers.Remove(controller);
+        }
+    }
+
+
 }
