@@ -15,17 +15,21 @@ namespace MAIS.Modules.CrimsAddinHealth.Client;
 public sealed class ServerHubRelay : BackgroundService
 {
     private readonly IHubContext<AddinHealthHub, IAddinHealthHubClient> _localHub;
+    private readonly AddinScanWorker         _scanWorker;
     private readonly CrimsAddinHealthOptions _options;
     private readonly ILogger<ServerHubRelay> _logger;
 
+
     public ServerHubRelay(
         IHubContext<AddinHealthHub, IAddinHealthHubClient> localHub,
+        AddinScanWorker scanWorker,
         IOptions<CrimsAddinHealthOptions> options,
         ILogger<ServerHubRelay> logger)
     {
-        _localHub = localHub;
-        _options  = options.Value;
-        _logger   = logger;
+        _localHub   = localHub;
+        _scanWorker = scanWorker;
+        _options    = options.Value;
+        _logger     = logger;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -54,9 +58,22 @@ public sealed class ServerHubRelay : BackgroundService
             await _localHub.Clients.Group(ModuleConstants.ApproversGroup)
                 .UpdateStatusChanged(entry));
 
+        hub.On<string>("CheckCrimsStatus", async queueId =>
+            await _scanWorker.HandleCheckCrimsStatusAsync(queueId, stoppingToken));
+
+        hub.On<QueueEntry>("InitiateUpdate", async entry =>
+            await _scanWorker.HandleInitiateUpdateAsync(entry, stoppingToken));
+
+        hub.On<string>("TriggerScan", async requestId =>
+            await _scanWorker.RunOnDemandScanAsync(requestId, stoppingToken));
+
         hub.Reconnected += async _ =>
         {
-            try { await hub.InvokeAsync("JoinApproversGroup", stoppingToken); }
+            try
+            {
+                await hub.InvokeAsync("JoinApproversGroup", stoppingToken);
+                await hub.InvokeAsync("JoinClientGroup", Environment.MachineName, stoppingToken);
+            }
             catch { }
         };
 
@@ -67,6 +84,7 @@ public sealed class ServerHubRelay : BackgroundService
             {
                 await hub.StartAsync(stoppingToken);
                 await hub.InvokeAsync("JoinApproversGroup", stoppingToken);
+                await hub.InvokeAsync("JoinClientGroup", Environment.MachineName, stoppingToken);
                 _logger.LogInformation("ServerHubRelay connected to {Url}", serverHubUrl);
                 break;
             }

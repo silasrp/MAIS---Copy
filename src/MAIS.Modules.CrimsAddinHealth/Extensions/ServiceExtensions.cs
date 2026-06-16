@@ -67,7 +67,8 @@ public static class ServiceExtensions
         services.AddSingleton<ProcessDetector>();
         services.AddSingleton<FileUpdater>();
         services.AddSingleton<NotificationRelay>();
-        services.AddHostedService<AddinScanWorker>();
+        services.AddSingleton<AddinScanWorker>();
+        services.AddHostedService(sp => sp.GetRequiredService<AddinScanWorker>());
         services.AddHostedService<ServerHubRelay>();
         services.AddHttpClient("AddinHealthServer")
             .ConfigureHttpClient((sp, client) =>
