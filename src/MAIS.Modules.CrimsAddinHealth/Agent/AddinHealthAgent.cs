@@ -65,9 +65,10 @@ public sealed class AddinHealthAgent : IAddinHealthAgent
             if (!string.IsNullOrWhiteSpace(errorOutput))
                 _logger.LogWarning("Agent stderr: {Error}", errorOutput);
 
-            if (string.IsNullOrWhiteSpace(outputJson))
+            if (process.ExitCode != 0 || string.IsNullOrWhiteSpace(outputJson))
             {
-                _logger.LogWarning("Agent returned empty output for {Machine}", result.MachineName);
+                _logger.LogWarning("Agent exited with code {Code} for {Machine}. Stderr: {Error}",
+                    process.ExitCode, result.MachineName, errorOutput);
                 return BuildFallback(result);
             }
 

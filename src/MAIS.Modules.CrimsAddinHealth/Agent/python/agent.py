@@ -206,14 +206,14 @@ def main():
         if action == "analyze_scan":
             result = analyze_scan(data)
         else:
-            result = {"error": f"Unknown action: {action}"}
+            sys.stderr.write(f"Unknown action: {action}\n")
+            sys.exit(1)
 
         sys.stdout.write(json.dumps(result) + "\n")
         sys.stdout.flush()
 
     except Exception as exc:
-        sys.stdout.write(json.dumps({"error": str(exc)}) + "\n")
-        sys.stdout.flush()
+        sys.stderr.write(f"Error processing request: {exc}\n")
         sys.exit(1)
 
 
