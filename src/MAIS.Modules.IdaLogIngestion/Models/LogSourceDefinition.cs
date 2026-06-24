@@ -20,4 +20,5 @@ public sealed class LogSourceDefinition
     public int    UploadBackoffMinSeconds        { get; set; } = 5;
     public int    UploadBackoffMaxSeconds        { get; set; } = 300;
     public int    RotationBackstopPollSeconds    { get; set; } = 10;
+    public int    MultilineMaxWaitSeconds        { get; set; } = 5;
 }
