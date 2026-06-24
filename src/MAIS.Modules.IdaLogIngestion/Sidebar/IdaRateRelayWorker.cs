@@ -9,8 +9,6 @@ using MAIS.Modules.IdaLogIngestion.Server;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-
 namespace MAIS.Modules.IdaLogIngestion.Sidebar;
 
 /// <summary>
@@ -31,12 +29,12 @@ public sealed class IdaRateRelayWorker : BackgroundService
     public IdaRateRelayWorker(
         IngestionRateCardViewModel viewModel,
         HttpClient http,
-        IOptions<IdaLogIngestionOptions> options,
+        string hubUrl,
         ILogger<IdaRateRelayWorker> logger)
     {
         _viewModel = viewModel;
         _http      = http;
-        _hubUrl    = options.Value.ServerApiUrl.TrimEnd('/') + ModuleConstants.HubPath;
+        _hubUrl    = hubUrl;
         _logger    = logger;
     }
 

@@ -28,12 +28,12 @@ public sealed class IdaClientWorker : BackgroundService
 
     public IdaClientWorker(
         IOptions<IdaLogIngestionOptions> options,
-        HttpClient http,
+        IHttpClientFactory httpClientFactory,
         ILoggerFactory loggerFactory,
         ILogger<IdaClientWorker> logger)
     {
         _options       = options.Value;
-        _http          = http;
+        _http          = httpClientFactory.CreateClient("IdaLogIngestionServer");
         _loggerFactory = loggerFactory;
         _logger        = logger;
     }

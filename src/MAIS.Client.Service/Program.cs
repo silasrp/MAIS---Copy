@@ -6,6 +6,7 @@ using MAIS.Core.Abstractions;
 using MAIS.Infrastructure.Extensions;
 using MAIS.Modules.CrimsSeverity.Extensions;
 using MAIS.Modules.CrimsAddinHealth.Extensions;
+using MAIS.Modules.IdaLogIngestion.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -88,6 +89,7 @@ try
     // ── Module registrations ─────────────────────────────────────────────
     builder.Services.AddCrimsSeverityModule(builder.Configuration);
     builder.Services.AddCrimsAddinHealthModule(builder.Configuration, ModuleHostType.Client);
+    builder.Services.AddIdaLogIngestionModule(builder.Configuration, ModuleHostType.Client);
 
     // ── Build and Map ────────────────────────────────────────────────────
     var app = builder.Build();
@@ -95,6 +97,7 @@ try
     // ── Module setup (maps hub and static files) ─────────────────────────
     app.UseCrimsSeverityModule();
     app.UseCrimsAddinHealthModule();
+    app.UseIdaLogIngestionModule();
 
     app.MapControllers();
 

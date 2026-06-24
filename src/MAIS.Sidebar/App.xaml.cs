@@ -1,6 +1,9 @@
 using MAIS.Modules.CrimsSeverity;
 using MAIS.Modules.CrimsSeverity.Extensions;
 using MAIS.Modules.CrimsAddinHealth.Extensions;
+using MAIS.Modules.IdaLogIngestion;
+using MAIS.Modules.IdaLogIngestion.Extensions;
+using System.Linq;
 using MAIS.Sidebar.Abstractions;
 using MAIS.Sidebar.Configuration;
 using MAIS.Sidebar.Services;
@@ -95,6 +98,8 @@ public partial class App : System.Windows.Application
         services.Configure<ServiceConnectionOptions>(
             configuration.GetSection(ServiceConnectionOptions.SectionName));
 
+        services.AddSingleton<IConfiguration>(configuration);
+
         // Logging
         services.AddLogging(builder =>
         {
@@ -131,6 +136,13 @@ public partial class App : System.Windows.Application
         registry.AddCrimsAddinHealthSidebarCard(baseUrl, showNotification: (title, body) =>
             System.Windows.Application.Current.Dispatcher.BeginInvoke(
                 () => tray.ShowBalloonTip(title, body)));
+
+        var idaOpts    = services.GetRequiredService<IConfiguration>()
+                             .GetSection(IdaLogIngestionOptions.SectionName)
+                             .Get<IdaLogIngestionOptions>() ?? new();
+        var idaBaseUrl = string.IsNullOrEmpty(idaOpts.ServerApiUrl) ? baseUrl : idaOpts.ServerApiUrl;
+        var idaAppIds  = idaOpts.Sources.Select(s => s.AppId).ToList();
+        registry.AddIdaLogIngestionSidebarCard(idaBaseUrl, idaAppIds);
 
         foreach (var uri in registry.GetResourceDictionaryUris())
         {
