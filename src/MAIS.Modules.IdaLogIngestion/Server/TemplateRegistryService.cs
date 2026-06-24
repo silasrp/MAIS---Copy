@@ -201,6 +201,45 @@ public sealed class TemplateRegistryService
         finally { _gate.Release(); }
     }
 
+    /// <summary>
+    /// Replaces a pending review item with an enriched version carrying AI-generated fields.
+    /// Called by NovelTemplateReviewService after IdaReviewAgent returns a result.
+    /// No-ops silently if the template has already been approved or removed.
+    /// </summary>
+    public async Task EnrichPendingAsync(
+        string templateId,
+        string description,
+        ClassificationAction? suggestedClassification,
+        string rationale,
+        string[] extractionFields,
+        CancellationToken ct)
+    {
+        await _gate.WaitAsync(ct);
+        try
+        {
+            foreach (var (_, pending) in _pendingByApp)
+            {
+                if (!pending.TryGetValue(templateId, out var existing)) continue;
+
+                pending[templateId] = new NovelTemplateReviewItem
+                {
+                    TemplateId                   = existing.TemplateId,
+                    AppId                        = existing.AppId,
+                    TokenPattern                 = existing.TokenPattern,
+                    SampleMessages               = existing.SampleMessages,
+                    SeenOnMachineCount           = existing.SeenOnMachineCount,
+                    FirstSeenAt                  = existing.FirstSeenAt,
+                    AiHumanReadableDescription   = description,
+                    AiSuggestedClassification    = suggestedClassification,
+                    AiRationale                  = rationale,
+                    AiSuggestedExtractionFields  = extractionFields
+                };
+                return;
+            }
+        }
+        finally { _gate.Release(); }
+    }
+
     public async Task<int> GetPendingReviewCountAsync(CancellationToken ct)
     {
         await _gate.WaitAsync(ct);
