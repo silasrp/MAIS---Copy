@@ -1,0 +1,11 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:MAIS.Modules.IdaLogIngestion.Sidebar">
+    <!--
+        Implicit DataTemplate: WPF auto-applies this whenever an IngestionRateCardViewModel
+        appears in a sidebar ItemsControl — no DataTemplateSelector needed.
+    -->
+    <DataTemplate DataType="{x:Type local:IngestionRateCardViewModel}">
+        <local:IngestionRateCard/>
+    </DataTemplate>
+</ResourceDictionary>

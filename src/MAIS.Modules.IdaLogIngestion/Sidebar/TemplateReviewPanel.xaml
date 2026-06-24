@@ -1,0 +1,248 @@
+<Window x:Class="MAIS.Modules.IdaLogIngestion.Sidebar.TemplateReviewPanel"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:MAIS.Modules.IdaLogIngestion.Sidebar"
+        Title="IDA Template Review"
+        Width="640"
+        WindowStyle="None"
+        ResizeMode="CanResizeWithGrip"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        Topmost="False">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <SolidColorBrush x:Key="PanelBg"       Color="#0F1221"/>
+        <SolidColorBrush x:Key="HeaderBg"      Color="#161A30"/>
+        <SolidColorBrush x:Key="CardBg"        Color="#1A1F35"/>
+        <SolidColorBrush x:Key="BorderClr"     Color="#2A3A5C"/>
+        <SolidColorBrush x:Key="AccentBlue"    Color="#6C8EFF"/>
+        <SolidColorBrush x:Key="TextPrimary"   Color="#D1D5E8"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#8B95B0"/>
+        <SolidColorBrush x:Key="GreenOk"       Color="#34D399"/>
+        <SolidColorBrush x:Key="AmberAlert"    Color="#FB923C"/>
+        <SolidColorBrush x:Key="RedAlert"      Color="#F87171"/>
+
+        <Style x:Key="ActionBtn" TargetType="Button">
+            <Setter Property="Background"      Value="#6C8EFF22"/>
+            <Setter Property="BorderBrush"     Value="#6C8EFF55"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground"      Value="{StaticResource AccentBlue}"/>
+            <Setter Property="FontSize"        Value="10"/>
+            <Setter Property="Padding"         Value="10,4"/>
+            <Setter Property="Cursor"          Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#6C8EFF44"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="IngestBtn" TargetType="Button" BasedOn="{StaticResource ActionBtn}">
+            <Setter Property="Background"  Value="#34D39922"/>
+            <Setter Property="BorderBrush" Value="#34D39955"/>
+            <Setter Property="Foreground"  Value="{StaticResource GreenOk}"/>
+        </Style>
+
+        <Style x:Key="StatsBtn" TargetType="Button" BasedOn="{StaticResource ActionBtn}">
+            <Setter Property="Background"  Value="#FB923C22"/>
+            <Setter Property="BorderBrush" Value="#FB923C55"/>
+            <Setter Property="Foreground"  Value="{StaticResource AmberAlert}"/>
+        </Style>
+
+        <Style x:Key="DiscardBtn" TargetType="Button" BasedOn="{StaticResource ActionBtn}">
+            <Setter Property="Background"  Value="#FFFFFF08"/>
+            <Setter Property="BorderBrush" Value="#FFFFFF22"/>
+            <Setter Property="Foreground"  Value="{StaticResource TextSecondary}"/>
+        </Style>
+    </Window.Resources>
+
+    <Border CornerRadius="6" Background="{StaticResource PanelBg}"
+            BorderBrush="{StaticResource BorderClr}" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="4" Opacity="0.6" Direction="270"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- ── Header ── -->
+            <Border Grid.Row="0" Background="{StaticResource HeaderBg}"
+                    CornerRadius="6,6,0,0" Padding="16,10"
+                    MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Grid>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Ellipse Width="8" Height="8" Fill="{StaticResource AccentBlue}" Margin="0,0,8,0"/>
+                        <TextBlock Text="IDA Template Review" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextPrimary}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="↻ Refresh"
+                                Command="{Binding RefreshCommand}"
+                                IsEnabled="{Binding IsLoading, Converter={x:Static local:NegatingConverter.Instance}}"
+                                Background="Transparent" BorderThickness="0"
+                                Foreground="{StaticResource TextSecondary}"
+                                FontSize="10" Cursor="Hand" Padding="6,2" Margin="0,0,8,0"/>
+                        <Button Content="✕" Click="CloseButton_Click"
+                                Background="Transparent" BorderThickness="0"
+                                Foreground="{StaticResource TextSecondary}"
+                                FontSize="12" Cursor="Hand" Padding="4"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- ── Content ── -->
+            <Grid Grid.Row="1">
+
+                <!-- Loading -->
+                <TextBlock Text="Loading…"
+                           Foreground="{StaticResource TextSecondary}"
+                           FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"/>
+
+                <!-- Item list -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="12">
+                    <StackPanel>
+
+                        <!-- Empty / status message -->
+                        <TextBlock Text="{Binding StatusMessage}"
+                                   Foreground="{StaticResource TextSecondary}"
+                                   FontSize="11" HorizontalAlignment="Center"
+                                   Margin="0,40,0,0"
+                                   Visibility="{Binding StatusMessage, Converter={x:Static local:StringToVisibilityConverter.Instance}}"/>
+
+                        <ItemsControl ItemsSource="{Binding Items}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type local:NovelTemplateReviewItemViewModel}">
+                                    <Border Background="{StaticResource CardBg}"
+                                            BorderBrush="{StaticResource BorderClr}"
+                                            BorderThickness="1" CornerRadius="4"
+                                            Padding="12" Margin="0,0,0,10">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+
+                                            <!-- Row 0: Template ID + app + seen badge -->
+                                            <Grid Grid.Row="0">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding TemplateId}"
+                                                               FontSize="9" FontFamily="Consolas"
+                                                               Foreground="{StaticResource AccentBlue}"
+                                                               VerticalAlignment="Center"
+                                                               TextTrimming="CharacterEllipsis"
+                                                               MaxWidth="220"/>
+                                                    <TextBlock Text=" · " Foreground="{StaticResource TextSecondary}" FontSize="9"/>
+                                                    <TextBlock Text="{Binding AppId}"
+                                                               Foreground="{StaticResource TextSecondary}" FontSize="9"/>
+                                                </StackPanel>
+                                                <Border HorizontalAlignment="Right" CornerRadius="3" Padding="5,1"
+                                                        Background="#FFFFFF0A">
+                                                    <TextBlock Foreground="{StaticResource TextSecondary}" FontSize="9">
+                                                        <Run Text="seen on "/>
+                                                        <Run Text="{Binding SeenOnMachines}"/>
+                                                        <Run Text=" machine(s)"/>
+                                                    </TextBlock>
+                                                </Border>
+                                            </Grid>
+
+                                            <!-- Row 1: Token pattern -->
+                                            <TextBlock Grid.Row="1"
+                                                       Text="{Binding TokenDisplay}"
+                                                       FontFamily="Consolas" FontSize="10"
+                                                       Foreground="{StaticResource TextPrimary}"
+                                                       TextWrapping="Wrap" Margin="0,6,0,0"/>
+
+                                            <!-- Row 2: Sample message -->
+                                            <TextBlock Grid.Row="2"
+                                                       Text="{Binding SampleMessage}"
+                                                       FontSize="9" Foreground="{StaticResource TextSecondary}"
+                                                       FontStyle="Italic"
+                                                       TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
+                                                       MaxHeight="36" Margin="0,4,0,0"/>
+
+                                            <!-- Row 3: AI description -->
+                                            <Border Grid.Row="3" Margin="0,6,0,0"
+                                                    Background="#6C8EFF0F" CornerRadius="3" Padding="8,5"
+                                                    Visibility="{Binding HasAiEnrichment, Converter={StaticResource BoolToVis}}">
+                                                <StackPanel>
+                                                    <TextBlock Text="AI suggestion"
+                                                               FontSize="8" FontWeight="SemiBold"
+                                                               Foreground="{StaticResource AccentBlue}"
+                                                               Margin="0,0,0,2"/>
+                                                    <TextBlock Text="{Binding AiDescription}"
+                                                               FontSize="10" Foreground="{StaticResource TextPrimary}"
+                                                               TextWrapping="Wrap"/>
+                                                    <TextBlock Text="{Binding AiRationale}"
+                                                               FontSize="9" Foreground="{StaticResource TextSecondary}"
+                                                               TextWrapping="Wrap" Margin="0,2,0,0"
+                                                               FontStyle="Italic"/>
+                                                </StackPanel>
+                                            </Border>
+
+                                            <!-- Row 4: Action buttons -->
+                                            <StackPanel Grid.Row="4" Orientation="Horizontal"
+                                                        Margin="0,8,0,0" HorizontalAlignment="Right">
+                                                <Button Content="Ingest"
+                                                        Style="{StaticResource IngestBtn}"
+                                                        IsEnabled="{Binding IsProcessing, Converter={x:Static local:NegatingConverter.Instance}}"
+                                                        Command="{Binding DataContext.ApproveIngestCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}"
+                                                        Margin="0,0,6,0"/>
+                                                <Button Content="Stats Only"
+                                                        Style="{StaticResource StatsBtn}"
+                                                        IsEnabled="{Binding IsProcessing, Converter={x:Static local:NegatingConverter.Instance}}"
+                                                        Command="{Binding DataContext.ApproveStatsOnlyCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}"
+                                                        Margin="0,0,6,0"/>
+                                                <Button Content="Discard"
+                                                        Style="{StaticResource DiscardBtn}"
+                                                        IsEnabled="{Binding IsProcessing, Converter={x:Static local:NegatingConverter.Instance}}"
+                                                        Command="{Binding DataContext.DiscardCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+
+            <!-- ── Footer ── -->
+            <Border Grid.Row="2" Background="{StaticResource HeaderBg}"
+                    CornerRadius="0,0,6,6" Padding="16,8"
+                    BorderBrush="{StaticResource BorderClr}" BorderThickness="0,1,0,0">
+                <TextBlock Text="Select Ingest to retain full text · Stats Only to count only · Discard to drop"
+                           FontSize="9" Foreground="{StaticResource TextSecondary}"
+                           HorizontalAlignment="Center"/>
+            </Border>
+        </Grid>
+    </Border>
+</Window>
