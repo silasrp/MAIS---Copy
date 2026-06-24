@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using MAIS.Modules.IdaLogIngestion.Models;
