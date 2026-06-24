@@ -19,6 +19,13 @@ public sealed class IdaLogIngestionOptions
     public int    AgentTimeoutSeconds         { get; set; } = 30;
     public List<string> SidebarVisibleRoles   { get; set; } = ["Support", "Admin"];
 
+    // Client-only: machine identity stamped onto every log record.
+    // Defaults to the OS machine name if not set explicitly in appsettings.
+    public string AssetTag              { get; set; } = "";
+    public string ServerApiUrl          { get; set; } = "";
+    public string SpoolPath             { get; set; } = @"C:\ProgramData\MAIS\IdaLogIngestion\Spool";
+    public string LocalRegistryCachePath { get; set; } = @"C:\ProgramData\MAIS\IdaLogIngestion\RegistryCache";
+
     // Fleet-wide source definitions, pulled by every client at runtime.
     public List<LogSourceDefinition> Sources  { get; set; } = [];
 }
