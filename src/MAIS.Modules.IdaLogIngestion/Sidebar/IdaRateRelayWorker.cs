@@ -5,6 +5,7 @@ using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using MAIS.Modules.IdaLogIngestion.Models;
+using MAIS.Modules.IdaLogIngestion.Server;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
