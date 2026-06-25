@@ -13,7 +13,7 @@ public sealed class CrimsAddinHealthOptions
     public string AuditFolderPath       { get; set; } = @"D:\MAIS\Audit\addin-health";
     public string RepositoryUncPath     { get; set; } = @"\\server\MAIS_CrimsAddins";
     public int    MaxConcurrentUpdates  { get; set; } = 1;
-    public string AgentExePath          { get; set; } = @"Agent\agent.exe";
+    public string AgentExePath          { get; set; } = @"Agent\CrimsAddinHealthAgent.exe";
     public int    AgentTimeoutSeconds   { get; set; } = 30;
 
     // ── Client-side ──────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
-# build.ps1 — Run from MAIS.Modules.CrimsAddinHealth/Agent/python/
-# Produces Agent/CrimsAddinHealthAgent.exe alongside this script's parent folder.
+# build.ps1 — Run from MAIS.Modules.IdaLogIngestion/Agent/python/
+# Produces Agent/IdaLogIngestionAgent.exe alongside this script's parent folder.
 
 param(
     [string]$PythonExe = "python"
@@ -13,14 +13,14 @@ Write-Host "Installing dependencies..."
 & $PythonExe -m pip install -r "$ScriptDir\requirements.txt" --quiet
 & $PythonExe -m pip install pyinstaller --quiet
 
-Write-Host "Building agent.exe..."
+Write-Host "Building IdaLogIngestionAgent.exe..."
 & $PythonExe -m PyInstaller `
     --onefile `
-    --name CrimsAddinHealthAgent `
+    --name IdaLogIngestionAgent `
     --distpath $OutputDir `
     --workpath "$ScriptDir\build" `
     --specpath "$ScriptDir\build" `
     --noconfirm `
     "$ScriptDir\agent.py"
 
-Write-Host "Done. Output: $OutputDir\CrimsAddinHealthAgent.exe"
+Write-Host "Done. Output: $OutputDir\IdaLogIngestionAgent.exe"

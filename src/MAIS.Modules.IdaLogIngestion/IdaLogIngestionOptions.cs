@@ -15,7 +15,7 @@ public sealed class IdaLogIngestionOptions
     public string TemplateRegistryPath        { get; set; } = @"C:\ProgramData\MAIS\IdaLogIngestion\TemplateRegistry";
     public string PendingReviewPath           { get; set; } = @"C:\ProgramData\MAIS\IdaLogIngestion\PendingTemplateReviews";
     public int    MaxConcurrentIndexBatches   { get; set; } = 4;
-    public string AgentExePath                { get; set; } = @"Agent\agent.exe";
+    public string AgentExePath                { get; set; } = @"Agent\IdaLogIngestionAgent.exe";
     public int    AgentTimeoutSeconds         { get; set; } = 30;
     public List<string> SidebarVisibleRoles   { get; set; } = ["Support", "Admin"];
 
