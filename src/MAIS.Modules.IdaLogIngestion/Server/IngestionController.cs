@@ -25,7 +25,6 @@ namespace MAIS.Modules.IdaLogIngestion.Server;
 ///   GET  /rate                           — recent rate buckets for sidebar backfill
 /// </summary>
 [ApiController]
-[Authorize]
 [Route("api/v1/ida")]
 public sealed class IngestionController : ControllerBase
 {
