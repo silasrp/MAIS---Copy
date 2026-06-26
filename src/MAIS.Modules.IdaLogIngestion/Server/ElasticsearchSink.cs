@@ -22,7 +22,7 @@ public sealed class ElasticsearchSink
     private readonly string                  _indexPrefix;
     private readonly ILogger<ElasticsearchSink> _logger;
 
-    private static readonly JsonSerializerOptions _json = new();
+    private static readonly JsonSerializerOptions _json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
     public ElasticsearchSink(HttpClient http, string indexPrefix, ILogger<ElasticsearchSink> logger)
     {
