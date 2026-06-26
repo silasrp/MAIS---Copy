@@ -36,7 +36,7 @@ public sealed class LogTemplateMiner
     {
         var tokens = Tokenize(message);
         if (tokens.Length == 0)
-            return new TemplateMatch(ComputeTemplateId([message]), isNew: true, []);
+            return new TemplateMatch(ComputeTemplateId([message]), isNew: true, [], []);
 
         lock (_syncRoot)
         {
@@ -48,12 +48,13 @@ public sealed class LogTemplateMiner
                 return new TemplateMatch(
                     shape.TemplateId,
                     isNew: known is null,
-                    extractedVariables: shape.DiffPositions(tokens));
+                    extractedVariables: shape.DiffPositions(tokens),
+                    tokenPattern: (string[])shape.Tokens.Clone());
             }
 
             var newShape = LocalTemplateShape.CreateFrom(tokens);
             RegisterLocalShape(newShape);
-            return new TemplateMatch(newShape.TemplateId, isNew: true, []);
+            return new TemplateMatch(newShape.TemplateId, isNew: true, [], (string[])newShape.Tokens.Clone());
         }
     }
 

@@ -154,7 +154,7 @@ public sealed class IdaClientWorker : BackgroundService
             {
                 AppId          = source.AppId,
                 TemplateId     = match.TemplateId,
-                TokenPattern   = [],
+                TokenPattern   = match.TokenPattern,
                 SampleMessages = [entry.Message],
                 MachineName    = entry.MachineName
             };
