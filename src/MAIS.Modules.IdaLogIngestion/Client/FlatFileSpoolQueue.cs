@@ -209,10 +209,10 @@ public sealed class FlatFileSpoolQueue : IDisposable
         {
             // Seal any in-progress batches so data written up to this point is not lost.
             if (_ingestBatch?.RecordCount > 0) SealBatch(ref _ingestBatch, _ingestDir);
-            else _ingestBatch?.Seal();
+            else if (_ingestBatch is not null) { _ingestBatch.Seal(); File.Delete(_ingestBatch.FilePath); }
 
             if (_statsBatch?.RecordCount > 0) SealBatch(ref _statsBatch, _statsDir);
-            else _statsBatch?.Seal();
+            else if (_statsBatch is not null) { _statsBatch.Seal(); File.Delete(_statsBatch.FilePath); }
         }
     }
 
