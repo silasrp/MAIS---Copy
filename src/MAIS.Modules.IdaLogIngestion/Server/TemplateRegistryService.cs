@@ -275,4 +275,12 @@ public sealed class TemplateRegistryService
         await File.WriteAllTextAsync(tempPath, json, ct);
         File.Move(tempPath, path, overwrite: true);
     }
+
+    public async Task<IReadOnlyList<string>> GetPendingAppIdsAsync(CancellationToken ct)
+    {
+        await _gate.WaitAsync(ct);
+        try { return _pendingByApp.Keys.ToList().AsReadOnly(); }
+        finally { _gate.Release(); }
+    }
+
 }

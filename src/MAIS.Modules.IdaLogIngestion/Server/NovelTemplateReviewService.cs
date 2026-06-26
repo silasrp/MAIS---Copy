@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using MAIS.Modules.IdaLogIngestion.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace MAIS.Modules.IdaLogIngestion.Server;
 
@@ -25,7 +24,6 @@ public sealed class NovelTemplateReviewService : BackgroundService
 {
     private readonly TemplateRegistryService         _registry;
     private readonly IdaReviewAgent                  _agent;
-    private readonly IReadOnlyList<string>           _appIds;
     private readonly ILogger<NovelTemplateReviewService> _logger;
 
     private static readonly TimeSpan ReviewInterval = TimeSpan.FromMinutes(5);
@@ -33,12 +31,10 @@ public sealed class NovelTemplateReviewService : BackgroundService
     public NovelTemplateReviewService(
         TemplateRegistryService registry,
         IdaReviewAgent agent,
-        IOptions<IdaLogIngestionOptions> options,
         ILogger<NovelTemplateReviewService> logger)
     {
         _registry = registry;
         _agent    = agent;
-        _appIds   = options.Value.Sources.Select(s => s.AppId).ToList().AsReadOnly();
         _logger   = logger;
     }
 
@@ -54,7 +50,7 @@ public sealed class NovelTemplateReviewService : BackgroundService
 
     private async Task ReviewAllPendingAsync(CancellationToken ct)
     {
-        foreach (var appId in _appIds)
+        foreach (var appId in await _registry.GetPendingAppIdsAsync(ct))
         {
             if (ct.IsCancellationRequested) return;
 
