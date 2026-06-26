@@ -11,6 +11,7 @@ public sealed class IdaLogIngestionOptions
     public string ElasticsearchUrl            { get; set; } = "http://168.66.122.12:9200";
     public bool   CompatibilityMode           { get; set; } = true;
     public string IndexPrefix                 { get; set; } = "ida-logs";
+    public string ParityTestIndexPrefix        { get; set; } = "ida-logs-mais";
     public string ReceiptBufferPath           { get; set; } = @"C:\ProgramData\MAIS\IdaLogIngestion\ReceiptBuffer";
     public string TemplateRegistryPath        { get; set; } = @"C:\ProgramData\MAIS\IdaLogIngestion\TemplateRegistry";
     public string PendingReviewPath           { get; set; } = @"C:\ProgramData\MAIS\IdaLogIngestion\PendingTemplateReviews";

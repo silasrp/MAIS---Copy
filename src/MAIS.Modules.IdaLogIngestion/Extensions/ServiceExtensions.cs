@@ -53,7 +53,8 @@ public static class ServiceExtensions
             var opts   = sp.GetRequiredService<IOptions<IdaLogIngestionOptions>>().Value;
             var http   = sp.GetRequiredService<IHttpClientFactory>().CreateClient("IdaLogIngestionElasticsearch");
             var logger = sp.GetRequiredService<ILogger<ElasticsearchSink>>();
-            return new ElasticsearchSink(http, opts.IndexPrefix, logger);
+            var effectivePrefix = opts.CompatibilityMode ? opts.ParityTestIndexPrefix : opts.IndexPrefix;
+            return new ElasticsearchSink(http, effectivePrefix, logger);
         });
 
         services.AddHostedService<IndexerWorker>();
